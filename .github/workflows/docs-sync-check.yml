@@ -1,0 +1,101 @@
+name: Docs sync check
+
+# Anything updated goes through this check to see whether the site has
+# drifted from the source of truth (catduckgnaf/print-buddy/docs on main)
+# — and, if it has, the resulting "Docs sync needed" issue requires an
+# explicit per-page wiki decision before it can be closed.
+# See README.md ("Keeping the site in sync") and scripts/check-sync.sh.
+
+on:
+  schedule:
+    # Daily, 07:17 UTC
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: docs-sync-check
+  cancel-in-progress: false
+
+jobs:
+  sync-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this docs repo
+        uses: actions/checkout@v4
+
+      - name: Run sync check against upstream
+        id: check
+        run: |
+          set +e
+          scripts/check-sync.sh > drift-report.txt 2>&1
+          status=$?
+          set -e
+          cat drift-report.txt
+          {
+            echo "## Docs sync check"
+            echo ""
+            echo '```'
+            cat drift-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -eq 1 ]; then
+            echo "drift=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" -eq 0 ]; then
+            echo "drift=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Sync check itself failed (exit $status); see the log."
+            exit "$status"
+          fi
+
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: drift-report.txt
+
+      - name: Open or update the single "Docs sync needed" issue
+        if: steps.check.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Build the issue body from the committed template, filling in
+          # the exact drift list and a per-page wiki checklist.
+          python3 - << 'PYEOF'
+          import pathlib, re
+          report = pathlib.Path("drift-report.txt").read_text()
+          drift_lines = [l for l in report.splitlines()
+                         if l.startswith(("CHANGED:", "ADDED:", "REMOVED:", "MISSING-SITE-COPY:"))]
+          checklist = []
+          for line in drift_lines:
+              m = re.match(r"(?:CHANGED|ADDED|REMOVED|MISSING-SITE-COPY): (\S+)", line)
+              if m:
+                  checklist.append(f"- [ ] `{m.group(1)}` — wiki decision: **wiki-updated / wiki-not-needed** (record one)")
+          template = pathlib.Path(".github/docs-sync-issue-template.md").read_text()
+          body = template.replace("DRIFT_REPORT", "\n".join(f"- `{l}`" for l in drift_lines) or "(see workflow run)")
+          body = body.replace("WIKI_CHECKLIST", "\n".join(checklist) or "(no pages parsed — see workflow run)")
+          pathlib.Path("issue-body.md").write_text(body)
+          PYEOF
+
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'in:title "Docs sync needed"' --json number,title --jq '.[] | select(.title == "Docs sync needed") | .number' | head -n 1)"
+          if [ -n "$existing" ]; then
+            echo "Updating existing issue #$existing"
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
+          else
+            echo "Creating a new 'Docs sync needed' issue"
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Docs sync needed" --body-file issue-body.md
+          fi
+
+      - name: Note when there is no drift
+        if: steps.check.outputs.drift == 'false'
+        run: |
+          echo "No drift — no 'Docs sync needed' issue created or updated."
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'in:title "Docs sync needed"' --json number,title --jq '.[] | select(.title == "Docs sync needed") | .number' | head -n 1)"
+          if [ -n "$existing" ]; then
+            echo "An open 'Docs sync needed' issue (#$existing) exists from an earlier run; leaving it open — it closes only when its per-page wiki decisions are recorded."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
