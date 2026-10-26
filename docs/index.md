@@ -6,7 +6,7 @@ hero:
   text: "Prepare and manage 3D prints from Discord"
   tagline: "Share a MakerWorld or Printables link, or upload an STL or 3MF — Print Buddy guides you through preparation, filament choices and slicing, with an explicit confirmation before anything starts printing."
   image:
-    src: /logo.svg
+    src: /logo.png
     alt: Print Buddy
   actions:
     - theme: brand

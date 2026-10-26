@@ -7,7 +7,8 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/print-buddy-docs/favicon.svg' }],
+    ['link', { rel: 'icon', href: '/print-buddy-docs/favicon.ico' }],
+    ['link', { rel: 'apple-touch-icon', href: '/print-buddy-docs/apple-touch-icon.png' }],
     ['meta', { name: 'theme-color', content: '#f97316' }],
     ['meta', { property: 'og:title', content: 'Print Buddy' }],
     ['meta', { property: 'og:description', content: 'Prepare and manage 3D prints from Discord, with an explicit confirmation before printing.' }],
@@ -15,7 +16,7 @@ export default defineConfig({
     ['meta', { property: 'og:url', content: 'https://catduckgnaf.github.io/print-buddy-docs/' }],
   ],
   themeConfig: {
-    logo: '/logo.svg',
+    logo: '/logo.png',
     siteTitle: 'Print Buddy',
     nav: [
       { text: 'Guide', link: '/guide' },
