@@ -34,8 +34,10 @@ npm run docs:preview
 
 ## How updates work
 
-For now, re-syncing content is manual — but it always starts with the sync
-check, and it always ends with a wiki decision (next section).
+Re-syncing content follows the steps below — by hand, or with the
+Docs auto-sync workflow (see "Auto-sync" under "Keeping the site in
+sync") — but it always starts with the sync check, and it always ends
+with a wiki decision (next section).
 
 1. Run the sync check (below) to see exactly which pages drifted.
 2. Copy the changed user-facing guides from `print-buddy/docs/` into `docs/` here, lowercasing file names.
@@ -80,6 +82,33 @@ unimplemented work; the site publishes shipped guides), `RELEASE-NOTES.md`,
 `RENAME-MIGRATION.md`,
 `REUSE-MAP.md`, `hardcoded-inventory.md`, `home-assistant-panic.md`
 (and `material_temps.yaml`, which is not a guide).
+
+### Auto-sync
+
+The **Docs auto-sync** workflow (`.github/workflows/docs-auto-sync.yml`)
+automates steps 1–5 above for a given Print Buddy ref:
+`scripts/sync-docs.py` regenerates the site copies from upstream
+(including publishing newly added guides and removing deleted ones),
+verifies the result with `scripts/check-sync.sh` and a site build, and
+opens a PR with the diff — or updates the still-open sync PR for that
+ref. Nothing publishes until the PR is merged; the Deploy workflow then
+rebuilds the site from `main` as usual.
+
+Run it by hand from the Actions tab with an explicit ref (a release tag
+such as `2.1.6`, a branch or a SHA; blank means the latest release tag).
+It also runs when Print Buddy publishes a release: that repo's
+post-release surfaces workflow sends a `repository_dispatch`
+(`print-buddy-release`) here, provided the `DOCS_SYNC_TOKEN` secret is
+configured on the Print Buddy repo — without it, the release's surfaces
+checklist issue records the skip and links the manual dispatch instead.
+
+This workflow is the remedy the **release surfaces gate** in
+Print Buddy's `docker-publish` workflow points at: a version publish
+fails while this site has drift against `docs/` at the release ref, and
+merging the sync PR the auto-sync opens is what unblocks it. (Nightly
+builds are never gated.) The wiki decision below is unchanged: a merged
+auto-sync PR does not close out a sync until the per-page wiki
+decisions are recorded.
 
 ### The wiki decision
 
