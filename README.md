@@ -12,7 +12,7 @@ The content in `docs/` is copied from [`catduckgnaf/print-buddy/docs`](https://g
 
 See [catduckgnaf/print-buddy#312](https://github.com/catduckgnaf/print-buddy/issues/312) for the tracking issue.
 
-Internal file names were lowercased for the site (for example `INSTALL-LIGHT.md` became `install-light.md`), and inter-document links were rewritten to site-internal routes or, for targets that are not published here, to absolute GitHub URLs in the Print Buddy repo.
+Internal file names were lowercased for the site (for example `DISCORD-BOT-SETUP.md` became `discord-bot-setup.md`), and inter-document links were rewritten to site-internal routes or, for targets that are not published here, to absolute GitHub URLs in the Print Buddy repo.
 
 ## Run locally
 

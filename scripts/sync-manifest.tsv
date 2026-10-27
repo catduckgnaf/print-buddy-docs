@@ -3,7 +3,6 @@
 # Source of truth: catduckgnaf/print-buddy docs/ on main (synced from upstream main 723fa34).
 # Update the hash column only when the site copy in docs/ is re-synced from upstream.
 README.md	guide.md	01c74541c0e907bd1ebb9f1d46dbc6f6696d7dbbf1fd63ec083c8caefdfc2794
-INSTALL-LIGHT.md	install-light.md	e52ee7c14622eece5a59b4d952bd05f113345b78f503d7883fa2ec555f8f9571
 STANDALONE.md	standalone.md	77a3163c35e081c3a4f68d3b4cfad862d2e93646e438f3236e95be74284037ee
 DOCKER.md	docker.md	4610eb3a9b9958da6cb384a76dc0e2c138d22f1230f2f49f6546d78f508f697d
 INSTALL.md	install.md	1ae7c9a31b5734b667ab2fa2b9977314559ed77445e5e13613eaa67863fd0c98

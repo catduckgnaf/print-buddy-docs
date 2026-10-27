@@ -20,7 +20,7 @@ export default defineConfig({
     siteTitle: 'Print Buddy',
     nav: [
       { text: 'Guide', link: '/guide' },
-      { text: 'Install', link: '/install-light' },
+      { text: 'Install', link: '/docker' },
       { text: 'Printers', link: '/printer-profiles' },
       { text: 'Configuration', link: '/configuration-yaml' },
       { text: 'Troubleshooting', link: '/troubleshooting' },
@@ -44,7 +44,6 @@ export default defineConfig({
       {
         text: 'Install',
         items: [
-          { text: 'Light Install', link: '/install-light' },
           { text: 'Standalone Bot', link: '/standalone' },
           { text: 'Docker', link: '/docker' },
           { text: 'Hermes Installation', link: '/install' },

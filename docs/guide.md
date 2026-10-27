@@ -6,7 +6,7 @@
 
 ## 1. Install one mode
 
-- [Light install](./install-light.md): one command for a Raspberry Pi or Debian/Ubuntu machine; asks about your printer and sets up the standalone bot or a Hermes profile. Needs a [Discord bot](./discord-bot-setup.md).
+- [Docker](./docker.md): the single-container install — bot, listener and bundled Spoolman in one image, including the Unraid template.
 - [Standalone bot](./standalone.md): Discord without Hermes or a required LLM; token permissions, configuration, setup checks and systemd services.
 - [Telegram bot setup](./telegram-bot-setup.md): run the standalone bot on Telegram instead of Discord (#164); a pure bot with no LLM, long polling, inline-keyboard prompts. Also covers pairing with ZMod's moonraker-telegram-bot as a companion for live control, notifications and timelapse (#300).
 - [Matrix bot setup](./matrix-bot-setup.md): run the standalone bot in a Matrix room instead (#164); a pure bot with no LLM, /sync polling, numbered-list prompts, unencrypted room required.

@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /install-light
+      link: /docker
     - theme: alt
       text: View on GitHub
       link: https://github.com/catduckgnaf/print-buddy
@@ -44,7 +44,7 @@ features:
 ## Start here
 
 - [Introduction](/guide) — the documentation index and how to find the right guide.
-- [Light install](/install-light) — one command for a Raspberry Pi or Debian/Ubuntu machine.
+- [Docker](/docker) — the single-container install: bot, listener and bundled Spoolman in one image.
 - [Discord bot setup](/discord-bot-setup) — create your Discord application and bot, and hand Print Buddy the token and IDs safely.
 - [Printer profiles](/printer-profiles) — supported printers, delivery methods and verification limits.
 - [Troubleshooting](/troubleshooting) — troubleshoot by symptom.
