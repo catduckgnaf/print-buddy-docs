@@ -40,14 +40,14 @@ message. `python3 -m print_buddy.doctor` warns when a Hermes profile holds the s
 | `telegram.chat_id` | empty | The print chat. Group and channel IDs are negative. The bot ignores every other chat (forum topics inside it work like threads) |
 | `telegram.allowed_user_ids` | empty | Telegram user IDs allowed to use the bot, separated by commas or spaces |
 | `telegram.approval_user_id` | empty | Always allowed as well |
-| `telegram.upload_max_bytes` | `50000000` | Largest file the Telegram bot uploads (the Bot API cloud limit) |
+| `telegram.upload_max_bytes` | `50000000` | Largest file the Telegram bot uploads (the Bot API cloud limit); timelapse video is shrunk to this value, not Discord's |
 | `matrix.homeserver_url` | empty | The Matrix homeserver base URL (matrix.org or self-hosted) |
 | `matrix.access_token_env` | `MATRIX_ACCESS_TOKEN` | Name of the environment variable that holds the Matrix access token |
 | `matrix.room_id` | empty | The print room's ID (starts with `!`). The room must be unencrypted; the bot ignores every other room |
 | `matrix.allowed_user_ids` | empty | Matrix user IDs allowed to use the bot, full `@user:server` form, separated by commas or spaces |
 | `matrix.approval_user_id` | empty | Always allowed as well |
 | `matrix.bot_user_id` | empty | The bot's own Matrix user ID. Empty: asked from the homeserver at startup |
-| `matrix.upload_max_bytes` | `50000000` | Largest file the Matrix bot uploads; lowered to the homeserver's media limit when it reports a smaller one |
+| `matrix.upload_max_bytes` | `50000000` | Largest file the Matrix bot uploads; lowered to the homeserver's media limit when it reports a smaller one. Timelapse video is shrunk to that limit; if it still cannot fit, the completion post says so instead of attaching the video |
 | `bot.health_port` | `0` | Serve `GET /healthz` on this port (200 healthy, 503 not). `0` turns the HTTP check off |
 | `bot.health_stale_s` | `120` | The health check fails when the heartbeat is older than this |
 | `bot.sync_commands` | `true` | Register the slash commands with Discord at startup |
@@ -56,13 +56,16 @@ message. `python3 -m print_buddy.doctor` warns when a Hermes profile holds the s
 | `logging.file` | empty | Also write a rotating log file (5 MiB, 3 backups) at this path. Empty logs to stderr only |
 | `discord.bot_name` | `Print Buddy` | Name used in bot replies and help; environment: `PRINT_BUDDY__DISCORD__BOT_NAME` |
 | `discord.chat_id` | empty | The print channel. The bot ignores every other channel (threads inside it work) |
-| `discord.allowed_user_ids` | empty | Discord user IDs allowed to use the bot, separated by commas or spaces |
-| `discord.approval_user_id` | empty | Always allowed as well |
+| `discord.allowed_user_ids` | empty | Optional whitelist of Discord user IDs, separated by commas or spaces. Empty lets everyone in the print channel use the bot |
+| `discord.denied_user_ids` | empty | Optional deny list of Discord user IDs; a denied user is refused even when whitelisted or the approval user |
+| `discord.approval_user_id` | empty | Always allowed as well; setting one does not restrict anyone else |
 | `discord.token_env` | `DISCORD_BOT_TOKEN` | Name of the environment variable that holds the bot token |
 | `llm.chat_url` | empty | Optional OpenAI-compatible chat completions URL. Empty: unmatched text gets the command list |
 | `llm.model` | empty | Model name, required when `chat_url` is set |
 | `llm.api_key_env` | `LLM_API_KEY` | Name of the environment variable that holds the LLM API key, if it needs one |
 | `llm.timeout_s` | `20` | LLM request timeout |
+| `vision.roast_enabled` | `true` | The one-line roast on the print-started post only (never on the completion post). On by default whenever an LLM/vision endpoint is available (`services.vision_chat_url` plus `CLIPROXY_API_KEY`), on every platform — Telegram and Matrix included, even though their chat never uses `[llm]`. `false` turns roasts off; camera checks are unaffected |
+| `vision.roast_model` | `luna-latest` | Model that writes the roast |
 
 Every key can come from the environment as `PRINT_BUDDY__SECTION__KEY`, for example
 `PRINT_BUDDY__BOT__MODE=standalone` or `PRINT_BUDDY__DISCORD__ALLOWED_USER_IDS="111 222"`.
@@ -73,8 +76,11 @@ the same variable from `.env`. Restart the bot after changing it. This changes i
 not the Discord account username or server nickname; set those in Discord. The default stays `Print Buddy`.
 
 The token is only ever read from the environment variable `discord.token_env` names, or from the `.env` file in
-`paths.hermes_home` (the data folder; the name is historical, it does not need Hermes). Nobody allowed means
-nobody can use the bot: with no allowed users, every message is ignored and `check` fails.
+`paths.hermes_home` (the data folder; the name is historical, it does not need Hermes). With no allow list,
+everyone in the print channel can use the bot — the channel is the access boundary — and `check` reports
+`access: channel (everyone)`; set `discord.allowed_user_ids` to restrict the bot to listed users, and
+`discord.denied_user_ids` to exclude specific users in any mode. A refused message is logged at INFO with
+the user ID and reason, and answered in channel once per user per hour — never silently dropped.
 
 ```yaml
 # config/local.yaml
@@ -96,7 +102,7 @@ services:
 | Command | What it does |
 |---|---|
 | `python3 -m print_buddy.bot` (or `... run`) | Start the bot. Refuses to start, and lists why, unless every check below passes |
-| `python3 -m print_buddy.bot check` | Offline setup check: mode, token present, channel, allowed users, discord.py, handlers loaded, no Hermes module imported, state folder writable, LLM. Exit 1 on any FAIL |
+| `python3 -m print_buddy.bot check` | Offline setup check: mode, token present, channel, allowed users, discord.py, handlers loaded, no Hermes module imported, state folder writable, LLM, roast. Exit 1 on any FAIL |
 | `python3 -m print_buddy.bot health` | Exit 0 only while a running bot reports a fresh heartbeat, is logged in, its process is alive and no Hermes module is loaded in it |
 | `python3 -m print_buddy.hermes.moonraker_event_listener` | The printer listener, unchanged. In standalone mode it posts over the configured platform's REST API with that platform's bot token (Discord REST, the Telegram Bot API when `bot.platform` is `telegram`, or the Matrix Client-Server API when it is `matrix`; its Discord button posts degrade to plain text on Telegram and Matrix) |
 | `python3 -m print_buddy.doctor` | Also reports the bot mode, the Discord login and a token shared with a Hermes profile |
@@ -140,10 +146,23 @@ Required environment: `PRINT_BUDDY__BOT__MODE=standalone`, `DISCORD_BOT_TOKEN`, 
   buttons. "print it" after a link, and "print the last one again", work.
 * Slash commands: `/print-next`, `/print-stop`, `/print-resume`, `/print-again`, `/print-reboot`,
   `/print-coldpull`, `/print-maintenance`, `/print-colors`, `/spool`, `/print-lookup`, `/print-troubleshoot`,
-  `/print-macros` (Moonraker printers only; lists the macros the printer defines, read-only),
+  `/print-macros` (Moonraker printers only; lists the macros the printer defines, and `run <name>` runs one behind a confirmation),
   `/print-buddy` (guided setup and read-only debugging), `/print-help`. Typing the same text works too.
+* `/print-design <what to make>` (or the short `/design`) designs a new part with AI + OpenSCAD (see
+  [AI design](./design.md)); with a model file dropped in the same message, or a model link in it, it edits
+  that model instead, and phrases like "design me …" or "design this" start design without the command.
+  Design is on automatically whenever an OpenAI-compatible endpoint is configured — the `[design]`
+  settings, or `[llm]`'s — unless `design.enabled` is set false; it also needs the `openscad` binary on
+  the machine (the container image includes it; a native install must add it, e.g. `apt install openscad`).
+  Design runs on Discord, Telegram and Matrix; on Telegram and Matrix it is the one model-backed
+  feature, served by the configured `[design]` endpoint only — ordinary chat there still gets no LLM
+  reply and falls back to the command list, exactly as before.
 * Listener posts (started, complete, failed, timelapse) and alert buttons (Resume, Cancel, spool questions, IFS
   insertion, plate picker) work with the Hermes gateway stopped.
+* A pending spool question (filament runout or a mid-print swap) can also end the print: tap its **Cancel print**
+  button or reply `cancel the print`. That cancels through the same path as `/print-stop`, closes the question
+  and stops its reminders; filament usage stays paused for every spool, exactly as a cancelled print leaves it.
+  If the cancel does not end the print, the question stays open and answerable.
 * A typed reply answers your own open question, as under Hermes ("2" for two copies, "split", "cancel"). It
   never answers another allowed user's question, even in the same channel or thread. Buttons are shared: any
   allowed user may press an open question's button, and the message then shows who chose.
@@ -173,7 +192,7 @@ Required environment: `PRINT_BUDDY__BOT__MODE=standalone`, `DISCORD_BOT_TOKEN`, 
    that profile).
 2. Keep `paths.hermes_home` pointing at the old profile to keep its state (print numbers, plans, alerts), or copy
    its `state/` folder to the new data folder.
-3. Set `bot.mode: standalone`, `discord.allowed_user_ids`, and put `DISCORD_BOT_TOKEN` in the environment or the
+3. Set `bot.mode: standalone` and `discord.chat_id` (`discord.allowed_user_ids` is optional), and put `DISCORD_BOT_TOKEN` in the environment or the
    data folder's `.env`.
 4. Run `python3 -m print_buddy.bot check`, then `scripts/install-standalone.sh` and enable both units.
 

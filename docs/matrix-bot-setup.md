@@ -5,7 +5,11 @@ or Telegram (#164). The same handlers, prompts and safety gates serve every
 platform; only the transport changes. The Matrix bot is a **pure bot: it
 has no LLM**. Unmatched text gets the command list, and no `[llm]` setting
 is ever consulted for Matrix — deliberate, the same no-LLM posture Telegram
-proved first.
+proved first. One-way posts are the exception, as on Telegram: the
+print-started posts carry the one-line **roast** (completion posts never do) when
+an LLM/vision endpoint is configured — `vision.roast_enabled`, on by
+default whenever that endpoint is available; set it `false` to turn
+roasts off. See [The roast](./telegram-bot-setup.md#the-roast).
 
 The bot talks to the homeserver with the Matrix Client-Server API by long
 polling (`/sync`), so it needs no inbound port, no public URL and no
@@ -52,6 +56,14 @@ Print Buddy's allowed-user list.
    profile. Collect the ID of every person who may print, plus the
    approver's. Matrix IDs are never numbers.
 
+With several printers (a `printers:` list, see
+[SETTINGS.md](./settings.md)), create one room per printer, invite the bot
+to each, and put each room's ID in that printer's `chat_id` entry: each
+room then drives only its own printer, end to end. The `[matrix] room_id`
+below remains the fallback room for the one entry that sets no `chat_id`
+(the first, default printer). A room no printer claims gets silence, and
+two entries claiming one room refuse startup.
+
 ## 3. Configure Print Buddy
 
 ```yaml
@@ -94,6 +106,20 @@ Printer event posts (started, complete, failed, timelapse) come from the
 listener, unchanged: in standalone mode with `platform: matrix` it posts
 into the same room through the Client-Server API instead of Discord REST.
 
+## AI design on Matrix
+
+`/print-design` (or `/design`) and the design phrases ("design me …",
+"design this" with a model file attached, or a model link) work on Matrix
+too — see [AI design with OpenSCAD](./design.md). Design is the one
+model-backed feature here, and it runs only through an explicitly
+configured `[design]` endpoint (or the `[llm]` values it inherits). With
+an endpoint configured, design is on automatically (set
+`design.enabled: false` to force it off); with none configured, the
+commands answer "design is not set up". Ordinary chat still never
+consults `[llm]` — the pure-bot rule is unchanged. Design's Slice it /
+Change it / Cancel choices arrive as a numbered list, like every other
+Matrix prompt.
+
 ## How Matrix differs from Discord here
 
 - **No buttons**: Matrix has no inline keyboards, so a prompt is the
@@ -110,7 +136,11 @@ into the same room through the Client-Server API instead of Discord REST.
 - **Limits**: messages are split at 16000 characters (well under
   Matrix's 64 KB event cap), files up to 50 MB, lowered automatically to
   the homeserver's own media limit when the server reports a smaller
-  one. Model files (.3mf/.stl) arrive as file events; previews and
+  one. Timelapse video is shrunk to that effective limit; if the
+  server's limit is below the smallest video the shrink can produce,
+  the completion post explains that the timelapse was recorded but is
+  too large for this server's upload limit, instead of the video
+  silently never arriving. Model files (.3mf/.stl) arrive as file events; previews and
   timelapses are sent back as image/video events when Matrix has a
   native type for them, everything else as a file event.
 - **Edits are not messages**: editing a message never re-runs a command.

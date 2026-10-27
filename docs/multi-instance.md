@@ -1,16 +1,19 @@
-# More than one printer: run one Print Buddy instance per printer
+# More than one printer: one instance per printer (the isolation alternative)
 
 [Documentation home](./guide.md) · [Docker](./docker.md) · Issue [#257](https://github.com/catduckgnaf/print-buddy/issues/257)
 
-Print Buddy is **one printer per instance** today: `[printer] model` is singular, and the
-hardware record, launch lease, job state, listener and approval flow all assume exactly one
-machine. True multi-printer support in a single instance is Stage 2 of
-[#257](https://github.com/catduckgnaf/print-buddy/issues/257) and is not implemented.
+Since Stage 2 of [#257](https://github.com/catduckgnaf/print-buddy/issues/257) shipped, **one
+Print Buddy instance serves a whole roster of printers**: a `[[printers]]` list in the config
+file, channel-per-printer routing, per-printer state and leases, and one listener per
+Moonraker printer — see [SETTINGS.md — Printers list](./settings.md#printers-list) and the
+[Multi-printer design](https://github.com/catduckgnaf/print-buddy/blob/main/docs/MULTI-PRINTER-DESIGN.md). For most households that is the answer, and
+it is the only setup this page is *not* about.
 
-The supported pattern for a mixed household — a Bambu Lab next to a Klipper machine, say —
-is **one instance per printer**. This page is that recipe (Stage 0 of #257). Each instance is
-an ordinary single-printer install; what matters is what must be kept separate, and the one
-thing that is designed to be shared: Spoolman.
+This page is the alternative that remains: **one instance per printer**, for households
+that want hard process isolation between printers — separate processes, separate data
+directories, separately revocable bot tokens, and a failure in one instance that cannot
+touch another. Each instance is an ordinary single-printer install; what matters is what
+must be kept separate, and the one thing that is designed to be shared: Spoolman.
 
 ## The two rules
 
@@ -41,11 +44,30 @@ exactly one instance.
 
 ### Chat separation
 
-Use a **separate Discord bot (token) per printer** where you can — it is the cleanest form
-of rule 2. The minimum is a separate channel **and** a separate approval user per instance,
-because prompts, approvals and "send the files here" delivery are all scoped to the
-configured channel and approval user. The same applies per platform: a separate Telegram
-chat or Matrix room per instance, never one chat watched by two instances.
+**One Discord bot token may serve every instance.** That is safe because of how the bot
+scopes itself, not because of the token: the bot core drops every message and every button
+press whose channel is not its configured `discord.chat_id`, and within that channel it
+acts for everyone in the channel by default, or only for users in its own
+`discord.allowed_user_ids` when a whitelist is set. Two instances logged in as the
+same bot therefore cannot see, answer or approve anything in each other's channels — each
+one only ever reads its own. (Both instances register the same slash commands at start-up,
+which is harmless: the command set is identical.) The hard minimum per instance is a
+separate channel **and** a separate approval user, because prompts, approvals and "send
+the files here" delivery are all scoped to the configured channel and approval user.
+
+The scoping is per channel, so the inverse is the hazard: **never let two instances serve
+the same channel on one token.** Both receive every message in that channel and both act —
+a leftover instance (an old Hermes profile on another host, a forgotten container) doing
+this looks exactly like random bot misbehaviour, including slicing failures from an
+outdated code path. The standalone bot logs a warning when Discord hands it a second
+READY on a live session, one sign that another process logged in with the same token.
+
+A **separate bot (token) per printer** is still the cleaner form where you can: each
+printer gets its own bot name in the member list, and a token can be revoked or rotated
+for one printer without touching the others. But it is the channel scoping above, not the
+token, that keeps instances apart — never let two instances share a channel, whichever
+token arrangement you choose. The same applies per platform: a separate Telegram chat or
+Matrix room per instance, never one chat watched by two instances.
 
 ## Sharing Spoolman (the one shared piece)
 
@@ -80,6 +102,32 @@ However you share it:
   printers; two printers printing concurrently from *different* spools is the normal case
   the shared inventory is for.
 
+## A worked example: a Bambu A1 next to a Flashforge AD5X
+
+The motivating mixed household, end to end — the same pair the roster shape serves in
+[the design walkthrough](https://github.com/catduckgnaf/print-buddy/blob/main/docs/MULTI-PRINTER-DESIGN.md), here as two instances. Two Compose
+stacks from this repository's Compose file, one standalone Spoolman (Option A above),
+one Discord server:
+
+| | Instance A | Instance B |
+| --- | --- | --- |
+| Compose project | `print-buddy-a1` | `print-buddy-ad5x` |
+| Printer | `bambulab.a1`, name `Garage A1` | `flashforge.ad5x`, name `Workshop AD5X` |
+| Connection | `[bambu] lan_host` set; `services.moonraker_url` stays empty | `services.moonraker_url` set to the AD5X |
+| Channel | `#a1-prints` | `#ad5x-prints` |
+| Data | Its own `PRINT_BUDDY_DATA` (for example `./data-a1`) | Its own `PRINT_BUDDY_DATA` (for example `./data-ad5x`) |
+| Spoolman | Bundled disabled; URL = the shared standalone Spoolman | Bundled disabled; URL = the shared standalone Spoolman |
+| Container children | The bot only — **no Moonraker listener runs** for a Bambu connection, and the bundled Spoolman is disabled | The Moonraker listener and the bot (bundled Spoolman disabled) |
+
+The last row is the [Which processes run](./docker.md#which-processes-run) table applied: the
+supervisor starts the listener only where the configured connection is Moonraker (#256),
+so instance A has no listener to keep healthy and instance B does — neither needs any
+per-instance process tuning. The two instances may use the same Discord bot token (see
+Chat separation): an approval tapped in `#a1-prints` can only ever start the A1, because
+instance B never reads that channel and instance A only acts there. Filament questions in
+either channel resolve against the one shared Spoolman inventory, so a spool moved from
+the A1 to the AD5X keeps its identity and remaining weight.
+
 ## Unraid
 
 Install the template once per printer and rename each container (Unraid container names
@@ -107,9 +155,13 @@ immediately instead of during a print approval.
 
 ## What this does not give you
 
-- One bot serving two printers, cross-printer job routing, or a combined status view —
-  that is #257 Stage 2, which starts from a design spike, not from this recipe.
+- One bot serving two printers or a combined status view — that is exactly what the
+  roster in one instance gives you (per-printer listeners, a combined health report and
+  the roster on the status page); this recipe trades it for process isolation.
+- Cross-printer job routing: deliberately not a feature in either shape. A channel is
+  bound to one printer and approvals in a channel can never start another printer.
 - Shared job history or records: each instance keeps its own archive and records, by
-  design (rule 1).
+  design (rule 1). (In the roster shape, history lives side by side under
+  `state/printers/<id>/` in the one instance.)
 - Any change to print safety: every instance keeps its own confirmation, readiness,
   lease and bed-clear gates for its own printer, unchanged.

@@ -27,7 +27,7 @@ UPSTREAM_REPO="https://github.com/catduckgnaf/print-buddy.git"
 
 # Internal / research-only files in upstream docs/ that are deliberately
 # NOT published on the site. Keep in step with README.md.
-EXCLUDE=" BAMBU-CONNECTIVITY.md DOCKER-117-ACCEPTANCE.md DOCKER-117-PROGRESS.md INTERNAL_RELEASE_NOTES.md ISSUE-126-TIMELAPSE.md KICAD-EVALUATION.md RELEASE-NOTES.md RENAME-MIGRATION.md REUSE-MAP.md hardcoded-inventory.md home-assistant-panic.md "
+EXCLUDE=" BAMBU-CONNECTIVITY.md DOCKER-117-ACCEPTANCE.md DOCKER-117-PROGRESS.md INTERNAL_RELEASE_NOTES.md ISSUE-126-TIMELAPSE.md KICAD-EVALUATION.md MULTI-PRINTER-DESIGN.md RELEASE-NOTES.md RENAME-MIGRATION.md REUSE-MAP.md hardcoded-inventory.md home-assistant-panic.md "
 
 cleanup=""
 if [ -n "${PRINT_BUDDY_DIR:-}" ]; then

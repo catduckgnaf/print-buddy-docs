@@ -39,6 +39,7 @@ export default defineConfig({
         items: [
           { text: 'Introduction', link: '/guide' },
           { text: 'Project Reference', link: '/project-reference' },
+          { text: 'Listener Domains', link: '/listeners' },
         ],
       },
       {
@@ -65,6 +66,7 @@ export default defineConfig({
         items: [
           { text: 'YAML Configuration', link: '/configuration-yaml' },
           { text: 'Settings Reference', link: '/settings' },
+          { text: 'Web UI', link: '/webui' },
         ],
       },
       {
@@ -72,6 +74,7 @@ export default defineConfig({
         items: [
           { text: 'Printer Profiles', link: '/printer-profiles' },
           { text: 'Flashforge AD5X', link: '/ad5x-contract' },
+          { text: 'Stock Flashforge', link: '/flashforge-stock' },
           { text: 'Bambu Lab', link: '/bambu-lab' },
           { text: 'Prusa', link: '/prusa' },
           { text: 'Elegoo', link: '/elegoo' },
@@ -95,6 +98,7 @@ export default defineConfig({
         text: 'Troubleshooting',
         items: [
           { text: 'Troubleshooting', link: '/troubleshooting' },
+          { text: 'Diagnostics', link: '/diagnostics' },
         ],
       },
     ],

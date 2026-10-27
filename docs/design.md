@@ -133,7 +133,7 @@ or by typing the choice, like every other Matrix prompt.
 
 ## Browsing designs in the Web UI
 
-The [Web UI](WEBUI.md) has a read-only **Designs** page (`/designs`, behind
+The [Web UI](./webui.md) has a read-only **Designs** page (`/designs`, behind
 the same access token as every other page) listing the design sessions on
 the machine, newest first: what each one is (created from a description, or
 an edit with its source named), its state, how many turns it took, when it

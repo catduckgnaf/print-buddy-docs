@@ -53,11 +53,17 @@ Setup asks seven small steps, validating each answer before moving on:
 ### The consent step
 
 Reaching the end writes nothing. The review step summarizes the answers (IDs are not
-repeated back) and offers three replies:
+repeated back) and offers four replies:
 
 - `apply` — the explicit consent to write. Only then are the collected settings merged
   into `config/local.yaml` through the same merge the CLI setup wizard uses: values already
   in the file always win, and no secret is written (the flow collected none).
+- `add` — set up another printer (#337). The flow asks for the first printer's id (the base
+  flow never needed one) and then, per added printer, its id, model, own channel and
+  Moonraker URL. Applying then writes a `[[printers]]` roster instead of the single-printer
+  sections — and refuses, leaving the file untouched, when the existing file already
+  describes a printer or cannot be rewritten faithfully. Each added printer gets its own
+  channel binding and state folder; Spoolman stays one shared inventory.
 - `manual` — nothing is written; the bot returns precise manual steps naming the file,
   sections, and keys to set, where the token belongs, and the offline checks to run.
 - `/print-buddy cancel` — leave setup unfinished and resume later.
@@ -103,6 +109,10 @@ and user IDs) are masked. Exact state/log paths therefore do not appear in Disco
 
 ## How this relates to the CLI checks
 
+- The optional [Web UI](./webui.md) is a third setup surface over the same YAML settings:
+  its `/config` page renders the catalogued settings with their source layer, previews a
+  change before writing, and applies the same settings validation. It does not replace
+  this guided flow, and neither surface collects secret values.
 - `python3 -m print_buddy.setup_wizard` is the full terminal installer wizard (printer
   registry menus, service installs with their own confirmations). The Discord setup flow
   covers initial configuration only and reuses the wizard's validation and config merge.

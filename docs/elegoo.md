@@ -16,20 +16,22 @@ Bed sizes are the pinned Orca profiles' printable areas — the values slicing e
 
 ## Set up the profiles
 
-Print Buddy ships no Elegoo slicer profiles (OrcaSlicer's Elegoo profiles are AGPL-3.0). Generate them from your own OrcaSlicer 2.4.2 installation:
+Print Buddy ships no Elegoo slicer profiles (OrcaSlicer's Elegoo profiles are AGPL-3.0). Generate them from your own OrcaSlicer v2.5.0-alpha installation (the shipped slicer since #356):
 
 ```bash
 python3 scripts/elegoo-templates.py --printer neptune4 --resources <OrcaSlicer resources folder>
 python3 scripts/elegoo-templates.py --vendor elegoo_sdcp --printer centauricarbon --resources <OrcaSlicer resources folder>
 ```
 
-The resources folder holds `profiles/Elegoo.json` and `profiles/Elegoo/`. The command resolves the profiles' `inherits`/`include` chains and refuses unless they hash to the checked identity recorded in the model's facts (OrcaSlicer 2.4.2, Elegoo vendor profiles `02.04.00.06`), then writes them into `<state>/orca-profiles/<model folder>`, never into the checkout. Missing, edited or unrecognised profiles fail closed, exactly as for Bambu Lab and Prusa.
+The resources folder holds `profiles/Elegoo.json` and `profiles/Elegoo/`, or — OrcaSlicer 2.5 and later — the packed preset cache `profiles/Elegoo.opc` on its own; the command reads either. It resolves the profiles' `inherits`/`include` chains and refuses unless they hash to a checked identity recorded in the model's facts (OrcaSlicer 2.4.2, Elegoo vendor profiles `02.04.00.06`; OrcaSlicer v2.5.0-alpha, `02.04.00.11`, from its tree or its packed cache — each packaging has its own identity), then writes them into `<state>/orca-profiles/<model folder>`, never into the checkout. No Elegoo profile was renamed or removed in 2.5.0-alpha. Missing, edited or unrecognised profiles fail closed, exactly as for Bambu Lab and Prusa.
 
 ## Neptune 4 family (Moonraker)
 
-The Neptunes run stock Klipper, so everything Moonraker-shaped works the way it does for any Klipper printer: set `services.moonraker_url` to the printer (for example `http://192.168.1.60:7125`) and Print Buddy uploads, starts and watches prints through the usual path, with `printer` delivery on by default. What the dedicated `elegoo` vendor adds over `klipper.generic` is the correct bed size per model and the pinned templates: the generic profile's 220 × 220 × 250 mm defaults match no Neptune and would silently mis-slice.
+The Neptunes run stock Klipper, so everything Moonraker-shaped works the way it does for any Klipper printer: set `services.moonraker_url` to the printer on the standard Moonraker port 7125 (for example `http://192.168.1.60:7125`) and Print Buddy uploads, starts and watches prints through the usual path, with `printer` delivery on by default. That `:7125` endpoint is the verified stock-firmware endpoint (#288, confirmed 2026-10-26); it supersedes the port-80 guidance briefly documented by #322, which rested on documentary sources only — the printer's port-80 web interface is not the endpoint to configure here. Self-installed Mainsail, Fluidd or OpenNept4une setups use the same `:7125` address. What the dedicated `elegoo` vendor adds over `klipper.generic` is the correct bed size per model and the pinned templates: the generic profile's 220 × 220 × 250 mm defaults match no Neptune and would silently mis-slice.
 
 Elegoo's Neptune start G-code is a self-contained sequence in the file (their profiles do not call a `PRINT_START` macro), so the guard checks the file carries that template start, names this model, and stays within the model's published limits (300 °C nozzle, 110 °C bed) — and refuses other ecosystems' start code, including a bare `PRINT_START` macro call.
+
+In the combined Docker container the Neptune models behave like any other Moonraker printer: the supervisor starts the Moonraker listener and the healthcheck requires its heartbeat (#256) — see [Which processes run](./docker.md#which-processes-run).
 
 ## Centauri Carbon (SDCP, opt-in)
 
@@ -52,6 +54,8 @@ delivery:
 The print path then runs the usual sequence: readiness from a live status answer → offline G-code verification (right model, single tool, temperatures within limits — 320 °C nozzle, 110 °C bed — no foreign start code) → launch lease → bed-clear approval inside the lease → a second status read → upload (1 MiB chunks with the file's MD5, the size read back and required to match before anything starts) → start command for that exact file → confirmation from a fresh status answer. An unconfirmed start is recorded as uncertain and is never resubmitted. Pause/resume/stop map to SDCP commands 129/131/130. Start requests carry `Calibration_switch: 0`: Print Buddy never starts a calibration the operator did not ask for.
 
 `services.moonraker_url` and `services.octoprint_url` must stay empty for a Centauri model; settings refuse to load otherwise.
+
+In the combined Docker container the supervisor honours that (#256): for a Centauri Carbon model it does not start the Moonraker listener at all, and the healthcheck does not require one, so the container starts, stays up and reports healthy with just the bot (with a token) and the bundled Spoolman — see [Which processes run](./docker.md#which-processes-run).
 
 ## What is not supported
 

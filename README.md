@@ -75,7 +75,9 @@ the *upstream* files rather than diffing the copies.
 Excluded upstream files (internal/research-only, not published here) are
 listed in `scripts/check-sync.sh`: `BAMBU-CONNECTIVITY.md`,
 `DOCKER-117-*.md`, `INTERNAL_RELEASE_NOTES.md`, `ISSUE-126-TIMELAPSE.md`,
-`KICAD-EVALUATION.md`, `RELEASE-NOTES.md`, `RENAME-MIGRATION.md`,
+`KICAD-EVALUATION.md`, `MULTI-PRINTER-DESIGN.md` (a design proposal for
+unimplemented work; the site publishes shipped guides), `RELEASE-NOTES.md`,
+`RENAME-MIGRATION.md`,
 `REUSE-MAP.md`, `hardcoded-inventory.md`, `home-assistant-panic.md`
 (and `material_temps.yaml`, which is not a guide).
 

@@ -1,18 +1,15 @@
 # Print Buddy documentation
 
-> This page is published on the [Print Buddy documentation site](https://catduckgnaf.github.io/print-buddy-docs/). Its content is copied from `docs/README.md` in the Print Buddy repo, which is the source of truth.
-
 [Project overview](https://github.com/catduckgnaf/print-buddy/blob/main/README.md) · [Contributing](https://github.com/catduckgnaf/print-buddy/blob/main/CONTRIBUTING.md)
 
 ## 1. Install one mode
 
-- [Docker](./docker.md): the single-container install — bot, listener and bundled Spoolman in one image, including the Unraid template.
-- [Standalone bot](./standalone.md): Discord without Hermes or a required LLM; token permissions, configuration, setup checks and systemd services.
+- [Standalone bot](./standalone.md): Discord without Hermes or a required LLM; token permissions, configuration, setup checks and systemd services. Needs a [Discord bot](./discord-bot-setup.md).
 - [Telegram bot setup](./telegram-bot-setup.md): run the standalone bot on Telegram instead of Discord (#164); a pure bot with no LLM, long polling, inline-keyboard prompts. Also covers pairing with ZMod's moonraker-telegram-bot as a companion for live control, notifications and timelapse (#300).
 - [Matrix bot setup](./matrix-bot-setup.md): run the standalone bot in a Matrix room instead (#164); a pure bot with no LLM, /sync polling, numbered-list prompts, unencrypted room required.
 - [Hermes installation](./install.md): profile installation, private overlays and listener setup.
 - [Docker](./docker.md): container configuration, persistent storage and service lifecycle. Follow the guide for the checked-out revision; do not assume a draft packaging PR is available.
-- [More than one printer](./multi-instance.md): one instance per printer for a multi-printer household, with one shared Spoolman (#257 Stage 0).
+- [More than one printer](./multi-instance.md): one instance per printer, kept as the alternative for hard process isolation, with one shared Spoolman. The default shape is one instance serving a whole roster — see [SETTINGS.md — Printers list](./settings.md#printers-list) and [MULTI-PRINTER-DESIGN.md](https://github.com/catduckgnaf/print-buddy/blob/main/docs/MULTI-PRINTER-DESIGN.md).
 - [From the image to a first A1 print](./bambu-a1-docker.md): the Docker image on a Bambu Lab A1, step by step (#274): Compose overrides, A1 templates from the bundled OrcaSlicer, the hand-written hardware record, MakerWorld token, Discord, the LAN print opt-in and the fixes still pending. Verified on an A1 on 26 Oct 2026.
 
 Do not run both Discord modes with the same token. Installing, enabling services and contacting a printer are separate actions from offline model analysis.
@@ -21,6 +18,8 @@ Do not run both Discord modes with the same token. Installing, enabling services
 
 - [YAML configuration and TOML migration](./configuration-yaml.md): schema, precedence and safety limits.
 - [Guided setup and debugging in Discord](./guided-setup-debugging.md): the `/print-buddy setup` checklist (resumable, consent-gated, never collects the token) and the read-only, redacted `/print-buddy debugging` checks.
+- [Web UI](./webui.md): the optional, off-by-default status page and picker configuration page that writes the same YAML settings file.
+- [Live camera in Discord](./discord-bot-setup.md#7-live-camera-activity-optional-311): the optional Discord Activity live view (#311) — Developer Portal and named-tunnel setup, allowlist, privacy notes, and the honest verification status (the live spike has not run).
 - [Settings reference](./settings.md): every setting with its YAML key, environment variable and Docker value, plus Docker build arguments and secrets.
 - [Detailed project reference](./project-reference.md): workflow examples, commands, printer models, spool identity rules, monitoring and updates.
 - [Printer macros](./macros.md): `/print-macros` live macro discovery on Moonraker printers, and the per-vendor macro matrix.
@@ -29,6 +28,7 @@ Do not run both Discord modes with the same token. Installing, enabling services
 - [Home Assistant panic and printer controls](https://github.com/catduckgnaf/print-buddy/blob/main/docs/home-assistant-panic.md): direct, no-LLM AD5X/ZMod printer controls from a Home Assistant dashboard, including the emergency-stop panic restart; no extra daemon.
 - [AD5X integration contract](./ad5x-contract.md): printer-specific behavior and limitations.
 - [ZMod printers](./zmod.md): all five ZMod models (AD5X, AD5M, AD5M Pro supported; Creator 5 / 5 Pro staged), and how their filament systems differ.
+- [Stock Flashforge printers](./flashforge-stock.md): the Adventurer 5X on factory firmware — the LAN HTTP API, IFS prints, the launched-print monitor, and timelapse from the camera source the printer advertises (the AD5X has no built-in camera; read the verification status before expecting a video).
 - [OctoPrint/Marlin notes](./octoprint-marlin.md): read the integration-specific limits before assuming Moonraker feature parity.
 - [Bambu Lab printers](./bambu-lab.md): profiles for every single-nozzle Bambu Lab printer (A1, A1 mini, P1P, P1S, P2S, X1, X1 Carbon, X1E, H2S), generating slicer profiles from your own OrcaSlicer, the G-code guard, opt-in read-only LAN status, unverified values, and the licensing basis awaiting approval.
 - [Bambu Lab live connectivity research](https://github.com/catduckgnaf/print-buddy/blob/main/docs/BAMBU-CONNECTIVITY.md): LAN MQTT/FTPS evidence from maintained integrations, the 2025 authorization change, the staged live-support plan for the A1/P1S, and the unknowns that need a live test.
@@ -37,6 +37,7 @@ Do not run both Discord modes with the same token. Installing, enabling services
 - [Read-only mesh topology audit](./mesh-audit.md): topology metrics, CLI usage, and manifold/watertight checks.
 - [100%-scale geometry layout and export](./geometry-layout.md): multi-object single-plate packing, status ladder, and geometry-only export boundaries.
 - [Opt-in reviewed CAD split plans and dowel connectors](./cad-split-plans.md): reviewed split presets, chamfered dowel generation, OpenSCAD CSG script synthesis, and post-boolean volume conservation checks.
+- [AI design with OpenSCAD](./design.md): `/print-design` describes a part in chat, renders and measures it, and hands the approved STL to normal intake (#388).
 
 ## 3. Troubleshoot by symptom
 
@@ -54,6 +55,9 @@ Do not run both Discord modes with the same token. Installing, enabling services
 
 ## 4. Develop and review
 
+- [Listener domains](./listeners.md): the per-domain listener registry, the normalised status/event contract, and liveness (#299).
+- [Diagnostics](./diagnostics.md): the #390 error taxonomy, greppable markers, the operator-message bar, and the staged audit inventory.
+- [Multi-printer design](https://github.com/catduckgnaf/print-buddy/blob/main/docs/MULTI-PRINTER-DESIGN.md): the #257 Stage 2 design for one instance serving many printers — audit of the one-printer assumptions, config/state/routing decisions, and the staged implementation plan. Design only; not implemented.
 - [Contribution workflow](https://github.com/catduckgnaf/print-buddy/blob/main/CONTRIBUTING.md) and [pull request template](https://github.com/catduckgnaf/print-buddy/blob/main/.github/PULL_REQUEST_TEMPLATE.md).
 - [Release-note guidance](https://github.com/catduckgnaf/print-buddy/blob/main/docs/RELEASE-NOTES.md) and [internal release history](https://github.com/catduckgnaf/print-buddy/blob/main/docs/INTERNAL_RELEASE_NOTES.md).
 - [Rename migration](https://github.com/catduckgnaf/print-buddy/blob/main/docs/RENAME-MIGRATION.md) for older installations.
