@@ -1,18 +1,18 @@
-# Print Buddy Documentation
+# Print Handy Documentation
 
-The documentation site for [Print Buddy](https://github.com/catduckgnaf/print-buddy) — prepare and manage 3D prints from Discord, with an explicit confirmation before printing.
+The documentation site for [Print Handy](https://github.com/catduckgnaf/print-handy) — prepare and manage 3D prints from Discord, with an explicit confirmation before printing.
 
-**Live site:** https://catduckgnaf.github.io/print-buddy-docs/
+**Live site:** https://catduckgnaf.github.io/print-handy-docs/
 
-This repository contains only the documentation site. It is not the Print Buddy project itself.
+This repository contains only the documentation site. It is not the Print Handy project itself.
 
 ## Source of truth
 
-The content in `docs/` is copied from [`catduckgnaf/print-buddy/docs`](https://github.com/catduckgnaf/print-buddy/tree/main/docs), which remains the source of truth. Guides that are internal or research-only in that repo are not published here; where a published guide links to one, the link points back to the file on GitHub.
+The content in `docs/` is copied from [`catduckgnaf/print-handy/docs`](https://github.com/catduckgnaf/print-handy/tree/main/docs), which remains the source of truth. Guides that are internal or research-only in that repo are not published here; where a published guide links to one, the link points back to the file on GitHub.
 
-See [catduckgnaf/print-buddy#312](https://github.com/catduckgnaf/print-buddy/issues/312) for the tracking issue.
+See [catduckgnaf/print-handy#312](https://github.com/catduckgnaf/print-handy/issues/312) for the tracking issue.
 
-Internal file names were lowercased for the site (for example `DISCORD-BOT-SETUP.md` became `discord-bot-setup.md`), and inter-document links were rewritten to site-internal routes or, for targets that are not published here, to absolute GitHub URLs in the Print Buddy repo.
+Internal file names were lowercased for the site (for example `DISCORD-BOT-SETUP.md` became `discord-bot-setup.md`), and inter-document links were rewritten to site-internal routes or, for targets that are not published here, to absolute GitHub URLs in the Print Handy repo.
 
 ## Run locally
 
@@ -40,8 +40,8 @@ sync") — but it always starts with the sync check, and it always ends
 with a wiki decision (next section).
 
 1. Run the sync check (below) to see exactly which pages drifted.
-2. Copy the changed user-facing guides from `print-buddy/docs/` into `docs/` here, lowercasing file names.
-3. Rewrite inter-document links the same way as the existing pages (site-internal for published pages, absolute GitHub URLs for anything else in the Print Buddy repo).
+2. Copy the changed user-facing guides from `print-handy/docs/` into `docs/` here, lowercasing file names.
+3. Rewrite inter-document links the same way as the existing pages (site-internal for published pages, absolute GitHub URLs for anything else in the Print Handy repo).
 4. Update the SHA-256 column for each re-synced page in `scripts/sync-manifest.tsv`.
 5. Run `scripts/check-sync.sh` (must report no drift) and `npm run docs:build` (fix any dead links it reports).
 6. Make the per-page wiki decision (below) and record it.
@@ -54,13 +54,13 @@ with a wiki decision (next section).
 ### Drift detection
 
 `scripts/sync-manifest.tsv` is the comparison record: for each published
-guide it lists the upstream file in `catduckgnaf/print-buddy/docs`, the
+guide it lists the upstream file in `catduckgnaf/print-handy/docs`, the
 site file here, and the SHA-256 of the upstream file at the last sync.
 The site copies have rewritten file names and links, so the check hashes
 the *upstream* files rather than diffing the copies.
 
 - Locally: `scripts/check-sync.sh` — clones upstream `main` (or uses
-  `PRINT_BUDDY_DIR=/path/to/print-buddy` if set), prints every
+  `PRINT_HANDY_DIR=/path/to/print-handy` if set), prints every
   CHANGED / ADDED / REMOVED page, then prints the wiki-check prompt.
   Exit 0 means no drift; exit 1 means drift.
 - In CI: the **Docs sync check** workflow
@@ -86,7 +86,7 @@ unimplemented work; the site publishes shipped guides), `RELEASE-NOTES.md`,
 ### Auto-sync
 
 The **Docs auto-sync** workflow (`.github/workflows/docs-auto-sync.yml`)
-automates steps 1–5 above for a given Print Buddy ref:
+automates steps 1–5 above for a given Print Handy ref:
 `scripts/sync-docs.py` regenerates the site copies from upstream
 (including publishing newly added guides and removing deleted ones),
 verifies the result with `scripts/check-sync.sh` and a site build, and
@@ -96,14 +96,14 @@ rebuilds the site from `main` as usual.
 
 Run it by hand from the Actions tab with an explicit ref (a release tag
 such as `2.1.6`, a branch or a SHA; blank means the latest release tag).
-It also runs when Print Buddy publishes a release: that repo's
+It also runs when Print Handy publishes a release: that repo's
 post-release surfaces workflow sends a `repository_dispatch`
-(`print-buddy-release`) here, provided the `DOCS_SYNC_TOKEN` secret is
-configured on the Print Buddy repo — without it, the release's surfaces
+(`print-handy-release`) here, provided the `DOCS_SYNC_TOKEN` secret is
+configured on the Print Handy repo — without it, the release's surfaces
 checklist issue records the skip and links the manual dispatch instead.
 
 This workflow is the remedy the **release surfaces gate** in
-Print Buddy's `docker-publish` workflow points at: a version publish
+Print Handy's `docker-publish` workflow points at: a version publish
 fails while this site has drift against `docs/` at the release ref, and
 merging the sync PR the auto-sync opens is what unblocks it. (Nightly
 builds are never gated.) The wiki decision below is unchanged: a merged
@@ -112,7 +112,7 @@ decisions are recorded.
 
 ### The wiki decision
 
-The [Print Buddy wiki](https://github.com/catduckgnaf/print-buddy/wiki)
+The [Print Handy wiki](https://github.com/catduckgnaf/print-handy/wiki)
 (Home, `_Sidebar`, Discord-Bot-Setup and any pages linked from them) is a
 separate surface that points readers at these guides. For **each**
 changed or added guide in a sync, someone must check the wiki and record
@@ -125,4 +125,4 @@ The site is built with [VitePress](https://vitepress.dev/), modelled on the [ope
 
 ## License
 
-MIT — see [LICENSE](LICENSE). This matches the Print Buddy project.
+MIT — see [LICENSE](LICENSE). This matches the Print Handy project.

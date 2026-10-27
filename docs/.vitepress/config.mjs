@@ -1,23 +1,23 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Print Buddy',
+  title: 'Print Handy',
   description: 'Prepare and manage 3D prints from Discord, with an explicit confirmation before printing.',
-  base: '/print-buddy-docs/',
+  base: '/print-handy-docs/',
   cleanUrls: true,
   lastUpdated: true,
   head: [
-    ['link', { rel: 'icon', href: '/print-buddy-docs/favicon.ico' }],
-    ['link', { rel: 'apple-touch-icon', href: '/print-buddy-docs/apple-touch-icon.png' }],
+    ['link', { rel: 'icon', href: '/print-handy-docs/favicon.ico' }],
+    ['link', { rel: 'apple-touch-icon', href: '/print-handy-docs/apple-touch-icon.png' }],
     ['meta', { name: 'theme-color', content: '#f97316' }],
-    ['meta', { property: 'og:title', content: 'Print Buddy' }],
+    ['meta', { property: 'og:title', content: 'Print Handy' }],
     ['meta', { property: 'og:description', content: 'Prepare and manage 3D prints from Discord, with an explicit confirmation before printing.' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:url', content: 'https://catduckgnaf.github.io/print-buddy-docs/' }],
+    ['meta', { property: 'og:url', content: 'https://catduckgnaf.github.io/print-handy-docs/' }],
   ],
   themeConfig: {
     logo: '/logo.png',
-    siteTitle: 'Print Buddy',
+    siteTitle: 'Print Handy',
     nav: [
       { text: 'Guide', link: '/guide' },
       { text: 'Install', link: '/docker' },
@@ -27,9 +27,9 @@ export default defineConfig({
       {
         text: 'External',
         items: [
-          { text: 'GitHub repo', link: 'https://github.com/catduckgnaf/print-buddy' },
-          { text: 'Releases', link: 'https://github.com/catduckgnaf/print-buddy/releases' },
-          { text: 'Wiki', link: 'https://github.com/catduckgnaf/print-buddy/wiki' },
+          { text: 'GitHub repo', link: 'https://github.com/catduckgnaf/print-handy' },
+          { text: 'Releases', link: 'https://github.com/catduckgnaf/print-handy/releases' },
+          { text: 'Wiki', link: 'https://github.com/catduckgnaf/print-handy/wiki' },
         ],
       },
     ],
@@ -78,6 +78,8 @@ export default defineConfig({
           { text: 'Bambu Lab', link: '/bambu-lab' },
           { text: 'Prusa', link: '/prusa' },
           { text: 'Elegoo', link: '/elegoo' },
+          { text: 'Creality', link: '/creality' },
+          { text: 'Qidi', link: '/qidi' },
           { text: 'OctoPrint / Marlin', link: '/octoprint-marlin' },
           { text: 'Flash Studio', link: '/flash-studio' },
           { text: 'ZMod', link: '/zmod' },
@@ -103,17 +105,17 @@ export default defineConfig({
       },
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/catduckgnaf/print-buddy' },
+      { icon: 'github', link: 'https://github.com/catduckgnaf/print-handy' },
     ],
     search: {
       provider: 'local',
     },
     editLink: {
-      pattern: 'https://github.com/catduckgnaf/print-buddy-docs/edit/main/docs/:path',
+      pattern: 'https://github.com/catduckgnaf/print-handy-docs/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
     footer: {
-      message: 'Documentation content is copied from <a href="https://github.com/catduckgnaf/print-buddy">catduckgnaf/print-buddy</a> — that repo\'s <code>docs/</code> directory is the source of truth.',
+      message: 'Documentation content is copied from <a href="https://github.com/catduckgnaf/print-handy">catduckgnaf/print-handy</a> — that repo\'s <code>docs/</code> directory is the source of truth.',
       copyright: 'Copyright © 2026 catduck. Released under the MIT License.',
     },
   },

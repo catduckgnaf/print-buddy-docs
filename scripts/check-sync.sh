@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# check-sync.sh — compare upstream Print Buddy docs against this site.
+# check-sync.sh — compare upstream Print Handy docs against this site.
 #
-# Source of truth: catduckgnaf/print-buddy, docs/*.md on main.
+# Source of truth: catduckgnaf/print-handy, docs/*.md on main.
 # Site copies live in docs/ here, with file names and inter-document links
 # rewritten, so a direct diff would always differ. Instead, drift is
 # detected with scripts/sync-manifest.tsv: for each published guide it
@@ -13,7 +13,7 @@
 #
 # Usage:
 #   scripts/check-sync.sh
-#   PRINT_BUDDY_DIR=/path/to/print-buddy-checkout scripts/check-sync.sh
+#   PRINT_HANDY_DIR=/path/to/print-handy-checkout scripts/check-sync.sh
 #
 # Output: one line per drifted page (CHANGED/ADDED/REMOVED), a
 # "NO DRIFT" line when everything matches, and — for every drifted page —
@@ -23,23 +23,23 @@ set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MANIFEST="$REPO_ROOT/scripts/sync-manifest.tsv"
-UPSTREAM_REPO="https://github.com/catduckgnaf/print-buddy.git"
+UPSTREAM_REPO="https://github.com/catduckgnaf/print-handy.git"
 
 # Internal / research-only files in upstream docs/ that are deliberately
 # NOT published on the site. Keep in step with README.md.
 EXCLUDE=" BAMBU-CONNECTIVITY.md DOCKER-117-ACCEPTANCE.md DOCKER-117-PROGRESS.md INTERNAL_RELEASE_NOTES.md ISSUE-126-TIMELAPSE.md KICAD-EVALUATION.md MULTI-PRINTER-DESIGN.md RELEASE-NOTES.md RENAME-MIGRATION.md REUSE-MAP.md hardcoded-inventory.md home-assistant-panic.md "
 
 cleanup=""
-if [ -n "${PRINT_BUDDY_DIR:-}" ]; then
-  UPSTREAM_DOCS="$PRINT_BUDDY_DIR/docs"
+if [ -n "${PRINT_HANDY_DIR:-}" ]; then
+  UPSTREAM_DOCS="$PRINT_HANDY_DIR/docs"
 else
   TMPDIR_SYNC="$(mktemp -d)"
   cleanup="$TMPDIR_SYNC"
-  if ! git clone --depth 1 --quiet "$UPSTREAM_REPO" "$TMPDIR_SYNC/print-buddy"; then
+  if ! git clone --depth 1 --quiet "$UPSTREAM_REPO" "$TMPDIR_SYNC/print-handy"; then
     echo "ERROR: could not clone $UPSTREAM_REPO" >&2
     exit 2
   fi
-  UPSTREAM_DOCS="$TMPDIR_SYNC/print-buddy/docs"
+  UPSTREAM_DOCS="$TMPDIR_SYNC/print-handy/docs"
 fi
 trap '[ -n "$cleanup" ] && rm -rf "$cleanup"' EXIT
 
@@ -102,7 +102,7 @@ fi
 
 echo ""
 echo "Wiki check — required before this drift can be closed out:"
-echo "The GitHub wiki for catduckgnaf/print-buddy (Home, _Sidebar,"
+echo "The GitHub wiki for catduckgnaf/print-handy (Home, _Sidebar,"
 echo "Discord-Bot-Setup and any pages linked from them) is a separate"
 echo "surface from this site. For each drifted page below, check the wiki"
 echo "and record exactly one decision per page:"

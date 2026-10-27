@@ -1,7 +1,7 @@
 name: Docs sync check
 
 # Anything updated goes through this check to see whether the site has
-# drifted from the source of truth (catduckgnaf/print-buddy/docs on main)
+# drifted from the source of truth (catduckgnaf/print-handy/docs on main)
 # — and, if it has, the resulting "Docs sync needed" issue requires an
 # explicit per-page wiki decision before it can be closed.
 # See README.md ("Keeping the site in sync") and scripts/check-sync.sh.

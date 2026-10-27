@@ -1,15 +1,15 @@
 name: Docs auto-sync
 
 # The automated form of the manual sync in README.md ("How updates
-# work"): regenerate the site copies from catduckgnaf/print-buddy/docs
+# work"): regenerate the site copies from catduckgnaf/print-handy/docs
 # at a given ref with scripts/sync-docs.py and open a PR with the diff.
 # Merging that PR is what publishes — the Deploy workflow rebuilds the
 # Pages site from main, never from a sync branch.
 #
 # Triggers:
 # - workflow_dispatch: run by hand with an explicit ref (this is the
-#   remedy the print-buddy release surfaces gate points at).
-# - repository_dispatch "print-buddy-release": sent by print-buddy's
+#   remedy the print-handy release surfaces gate points at).
+# - repository_dispatch "print-handy-release": sent by print-handy's
 #   post-release surfaces workflow when a release is published and the
 #   DOCS_SYNC_TOKEN secret is configured there; client_payload.ref
 #   carries the release tag.
@@ -27,12 +27,12 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: "Print Buddy ref to sync docs from (tag, branch or SHA; blank = latest release tag)"
+        description: "Print Handy ref to sync docs from (tag, branch or SHA; blank = latest release tag)"
         type: string
         required: false
         default: ""
   repository_dispatch:
-    types: [print-buddy-release]
+    types: [print-handy-release]
 
 permissions:
   contents: write
@@ -60,7 +60,7 @@ jobs:
           set -euo pipefail
           ref="${INPUT_REF:-$PAYLOAD_REF}"
           if [ -z "$ref" ]; then
-            ref="$(gh api repos/catduckgnaf/print-buddy/releases/latest --jq .tag_name)"
+            ref="$(gh api repos/catduckgnaf/print-handy/releases/latest --jq .tag_name)"
           fi
           [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || {
             echo "Ref contains unexpected characters: $ref" >&2
@@ -71,25 +71,25 @@ jobs:
             echo "ref=$ref"
             echo "branch=docs-sync/$slug"
           } >> "$GITHUB_OUTPUT"
-          echo "Syncing docs from catduckgnaf/print-buddy@$ref"
+          echo "Syncing docs from catduckgnaf/print-handy@$ref"
 
-      - name: Checkout upstream Print Buddy at the ref
+      - name: Checkout upstream Print Handy at the ref
         run: |
           set -euo pipefail
           # Outside the workspace, so the upstream tree can never leak
           # into the sync branch or the changed-file detection below.
-          git clone --depth 1 https://github.com/catduckgnaf/print-buddy.git "$RUNNER_TEMP/print-buddy-upstream"
-          git -C "$RUNNER_TEMP/print-buddy-upstream" fetch --depth 1 origin "${{ steps.ref.outputs.ref }}"
-          git -C "$RUNNER_TEMP/print-buddy-upstream" checkout --quiet FETCH_HEAD
+          git clone --depth 1 https://github.com/catduckgnaf/print-handy.git "$RUNNER_TEMP/print-handy-upstream"
+          git -C "$RUNNER_TEMP/print-handy-upstream" fetch --depth 1 origin "${{ steps.ref.outputs.ref }}"
+          git -C "$RUNNER_TEMP/print-handy-upstream" checkout --quiet FETCH_HEAD
 
       - name: Apply the sync
         id: sync
         run: |
           set -euo pipefail
           git switch -C "${{ steps.ref.outputs.branch }}"
-          python3 scripts/sync-docs.py --upstream "$RUNNER_TEMP/print-buddy-upstream" | tee "$RUNNER_TEMP/sync-report.txt"
+          python3 scripts/sync-docs.py --upstream "$RUNNER_TEMP/print-handy-upstream" | tee "$RUNNER_TEMP/sync-report.txt"
           {
-            echo "## Docs auto-sync — print-buddy@${{ steps.ref.outputs.ref }}"
+            echo "## Docs auto-sync — print-handy@${{ steps.ref.outputs.ref }}"
             echo ""
             echo '```'
             cat "$RUNNER_TEMP/sync-report.txt"
@@ -106,7 +106,7 @@ jobs:
         if: steps.sync.outputs.changed == 'true'
         run: |
           set -euo pipefail
-          PRINT_BUDDY_DIR="$RUNNER_TEMP/print-buddy-upstream" scripts/check-sync.sh
+          PRINT_HANDY_DIR="$RUNNER_TEMP/print-handy-upstream" scripts/check-sync.sh
           npm ci
           npm run docs:build
 
@@ -119,10 +119,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Sync docs from print-buddy $ref (auto-sync)"
+          git commit -m "Sync docs from print-handy $ref (auto-sync)"
           git push --force-with-lease origin "$branch"
           {
-            echo "Automated docs sync from [catduckgnaf/print-buddy@$ref](https://github.com/catduckgnaf/print-buddy/tree/$ref) — the source of truth — produced by \`scripts/sync-docs.py\` (workflow: Docs auto-sync)."
+            echo "Automated docs sync from [catduckgnaf/print-handy@$ref](https://github.com/catduckgnaf/print-handy/tree/$ref) — the source of truth — produced by \`scripts/sync-docs.py\` (workflow: Docs auto-sync)."
             echo ""
             echo '```'
             cat "$RUNNER_TEMP/sync-report.txt"
@@ -138,9 +138,9 @@ jobs:
           existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --state open --json number --jq '.[0].number // empty')"
           if [ -n "$existing" ]; then
             gh pr comment "$existing" --repo "$GITHUB_REPOSITORY" \
-              --body "Updated by a re-run of the Docs auto-sync for print-buddy@$ref (run $GITHUB_RUN_ID): the branch now carries the latest sync for that ref."
+              --body "Updated by a re-run of the Docs auto-sync for print-handy@$ref (run $GITHUB_RUN_ID): the branch now carries the latest sync for that ref."
             echo "Updated existing sync PR #$existing."
           else
             gh pr create --repo "$GITHUB_REPOSITORY" --head "$branch" \
-              --title "Docs sync: print-buddy@$ref" --body-file pr-body.md
+              --title "Docs sync: print-handy@$ref" --body-file pr-body.md
           fi

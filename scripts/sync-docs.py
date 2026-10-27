@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""sync-docs.py — apply the docs sync from an upstream Print Buddy checkout.
+"""sync-docs.py — apply the docs sync from an upstream Print Handy checkout.
 
 This is the automated form of the manual sync described in README.md
 ("How updates work"). It regenerates every published site copy from the
-source of truth (catduckgnaf/print-buddy/docs at the checkout given with
+source of truth (catduckgnaf/print-handy/docs at the checkout given with
 --upstream, which the caller has already resolved to the ref being
 synced), applying the site's established transformations:
 
 - file names are lowercased per scripts/sync-manifest.tsv,
 - a markdown link to another published guide becomes ./<site file>,
-- a markdown link to anything else in the Print Buddy repo becomes the
-  absolute GitHub URL (https://github.com/catduckgnaf/print-buddy/blob/main/<path>),
+- a markdown link to anything else in the Print Handy repo becomes the
+  absolute GitHub URL (https://github.com/catduckgnaf/print-handy/blob/main/<path>),
 - the manifest's SHA-256 column is updated to the upstream file's hash.
 
 It also handles the two structural cases the manual process handles:
@@ -30,7 +30,7 @@ It also handles the two structural cases the manual process handles:
   upstream source still has it.)
 
 Usage:
-  scripts/sync-docs.py --upstream /path/to/print-buddy-checkout
+  scripts/sync-docs.py --upstream /path/to/print-handy-checkout
 
 Output: one CHANGED / ADDED / REMOVED line per affected page, then a
 summary line. Exit code: 0 on success (including "nothing to do"),
@@ -51,7 +51,7 @@ DOCS_DIR = REPO_ROOT / "docs"
 MANIFEST = REPO_ROOT / "scripts" / "sync-manifest.tsv"
 CHECK_SYNC = REPO_ROOT / "scripts" / "check-sync.sh"
 CONFIG = DOCS_DIR / ".vitepress" / "config.mjs"
-GITHUB_BLOB = "https://github.com/catduckgnaf/print-buddy/blob/main/"
+GITHUB_BLOB = "https://github.com/catduckgnaf/print-handy/blob/main/"
 LINK_RE = re.compile(r"\]\(([^)\s]+)((?:\s+\"[^\"]*\")?)\)")
 
 
@@ -149,7 +149,7 @@ def strip_home_links(site_name):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--upstream", required=True,
-                        help="path to a catduckgnaf/print-buddy checkout")
+                        help="path to a catduckgnaf/print-handy checkout")
     args = parser.parse_args()
     upstream_docs = Path(args.upstream) / "docs"
     if not upstream_docs.is_dir():
