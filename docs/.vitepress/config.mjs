@@ -86,6 +86,7 @@ export default defineConfig({
           { text: 'Intake Limits', link: '/intake-limits' },
           { text: 'Geometry Layout', link: '/geometry-layout' },
           { text: 'CAD Split Plans', link: '/cad-split-plans' },
+          { text: 'AI Design', link: '/design' },
           { text: 'Mesh Audit', link: '/mesh-audit' },
           { text: 'Printer Macros', link: '/macros' },
         ],
