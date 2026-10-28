@@ -2,13 +2,13 @@
 # upstream_file<TAB>site_file<TAB>upstream_sha256_at_last_sync
 # Source of truth: catduckgnaf/print-handy docs/ on main. Last synced from the rename tree (PR #471 in the former print-buddy repo, head f5512fa, pre-merge); hashes re-sync on the next upstream sync after the rename merges.
 # Update the hash column only when the site copy in docs/ is re-synced from upstream.
-README.md	guide.md	4d4c674c45e0eb226c04ae74305ff87e5548ba8c13f3322626804f83998a07a8
-STANDALONE.md	standalone.md	34e77496b76fa75ce712b7e4ea0ca2037cf642f135c934d11cc6300da72ac4e0
+README.md	guide.md	5b2ed682068f70aa588bd33514882258f019cd025c6fc57a478c7c15e13b07db
+STANDALONE.md	standalone.md	d234f017849a0bf5a240319efa747771b3d1842401da7c7bad667310eca74893
 DOCKER.md	docker.md	317dc94cb184cc9c0d3c6ef60ae44d58e7971346700174e3c121b04d0d7e4162
 INSTALL.md	install.md	97011c56a78c898bf734ce20b6dc244a0b5d7daa04aba29be9917e72560b3841
 MULTI-INSTANCE.md	multi-instance.md	d2577d817a9fb757ffd279fde5a70b3a5df213921d6916553d6857f25c74d705
 BAMBU-A1-DOCKER.md	bambu-a1-docker.md	6a921f60859d056acd68dba9918aa348a17d4ca562e82bf83d3d2a144181e3da
-DISCORD-BOT-SETUP.md	discord-bot-setup.md	679d77c1981bb14cd274b33eab5d012a83eb3992f18c7cfad4e47e826bf627a2
+DISCORD-BOT-SETUP.md	discord-bot-setup.md	cb52a57fb64e086e32b173103d1cb3865273952a0db156d803ca63a16ca3967b
 TELEGRAM-BOT-SETUP.md	telegram-bot-setup.md	c1e6f5bc9cd9be107c2ab5f4487fa13ee039814ab84fc28ed0450a15ba84038e
 MATRIX-BOT-SETUP.md	matrix-bot-setup.md	188c9b1fc04eb2fb395eb7164fc804e95e2f95738481b399c72c3898417cb99f
 GUIDED-SETUP-DEBUGGING.md	guided-setup-debugging.md	00b4943fcbabab601bb4c2982d4310fabfc63737ddc6fdc23168dd363482b39e
@@ -36,3 +36,4 @@ MACROS.md	macros.md	865d5b2e38f9e721127c4c4ebe368e8393745365f380081111d582434a23
 ZMOD.md	zmod.md	24907c33e0660746391e98a950a2c1dda899bc9d46d8a884288a6944f485e67e
 CREALITY.md	creality.md	b44233c2217c42863c53adc41d5d70aaf9e30598d729bf0457615bc8a88a14d2
 QIDI.md	qidi.md	26b696e0653e3fb8164ba093308147fe3acfc49108399637478a2ffd98df3685
+PRINTER-SUPPORT.md	printer-support.md	505e4df3709bee80edb94c36bea1b385f0a6f7723d23f3914b5a127be47b6ec2
