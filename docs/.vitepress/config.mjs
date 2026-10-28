@@ -30,6 +30,7 @@ export default defineConfig({
           { text: 'GitHub repo', link: 'https://github.com/catduckgnaf/print-handy' },
           { text: 'Releases', link: 'https://github.com/catduckgnaf/print-handy/releases' },
           { text: 'Wiki', link: 'https://github.com/catduckgnaf/print-handy/wiki' },
+          { text: 'Printer support', link: '/printer-support' },
         ],
       },
     ],
