@@ -56,10 +56,27 @@ A bed-clear approval starts one print. Starting the same G-code again needs a ne
 * Filament estimates split across parts that share a spool, never multiplied.
 * `/spool` lists, changes, creates, and syncs spools without moving the printer. Bare or incomplete
   forms open a guided button flow (#475): known Spoolman filament types are offered first (their
-  colour/hex come from the database; hex is never asked), the create confirmation names the spool
-  number the new spool will be, and changing a slot asks the old spool's fate (shelf / archive /
-  depleted). Anchored plain phrases ("add new filament", "swap the filament", …) start the same flow
-  with no LLM involved; the complete typed forms stay one-shot.
+  colour/hex come from the database; hex is never asked), the very first question already previews
+  the spool number the new spool will be (#512 — write it on the spool before loading), and changing
+  a slot asks the old spool's fate (shelf / archive / depleted / delete, with Archive as depleted
+  recommended when the old spool has 0 g left). The brand question is skipped unless
+  `spool.prompt_brand` is on. Anchored plain phrases ("add new filament", "swap the filament", …)
+  start the same flow with no LLM involved; the complete typed forms stay one-shot.
+* The Discord insertion prompt (a spool changed on the printer's own screen) and the paused
+  spool question answer "New spool" with the same conversational walkthrough (#512) instead of
+  the old five-field text modal: material quick-select (PLA, Silk PLA, PLA+, PETG, TPU, ABS,
+  Other), colour/finish picker (known colours for the material first), starting-weight buttons
+  (1000 / 500 / 250 g or custom), the replaced spool's fate when the slot is occupied, and one
+  confirmation — nothing is created before it. When any label-reading route is available (#514),
+  the first step also offers **Use a photo of the label**: the operator sends one photo of the
+  spool's box or sticker as the next message, and the label is read by the first route that can —
+  its own barcode/QR code (zxing-cpp, local), the shared vision call (when an endpoint is
+  configured), or local OCR (tesseract, matched against the known filament vocabulary) —
+  extracting brand, material/sub-type, colour/blend, net weight and any printed label
+  temperatures. The values pre-fill the walkthrough at the same confirmation, which names the
+  route that read them (Edit details walks the normal steps; an unusable photo refuses with the
+  reason and falls back to them). Label temperatures are recorded on the Spoolman filament, so
+  the usual precedence holds for every material, and the photo itself is never stored.
 * `/print-colors <JOB.json>` opens the color selection flow for an archived job. Preparation only: it slices nothing, uploads nothing and starts nothing, and the path must be an archived `JOB.json`.
 * A swapped spool can finish a job sliced for the old one, by explicit choice.
 * `PRINT_HANDY` Klipper macro confirms ZMod can fall back to a matching backup slot.
@@ -88,6 +105,7 @@ Live camera streaming (#311) starts with a delivery-agnostic core in `print_hand
 * Nightly catch up against Moonraker job history so nothing is missed.
 * `/print-maintenance` guided checklist and reminders by print hours and days.
 * `/print-coldpull` runs an operator confirmed cold pull at configured temperatures.
+* `/nozzle change` (#513) walks a physical nozzle change: pick the diameter (0.2/0.4/0.6/0.8 mm) and material (brass, hardened steel, stainless steel, tungsten carbide, diamond), confirm heating in person, and — on Moonraker/Klipper printers only — it heats to 250 °C for the hot loosen, waits for the *Old Nozzle Removed & New Nozzle Threaded* and hot-torque confirmations, turns the heater off and waits for a live readback below 50 °C. Other connections get manual-heat instructions and the same step confirmations; nothing is sent to them. Completing the walk records the new nozzle in `printer_hardware.json` with the previous calibration marked historical only, then offers Z-offset (`--sync-z`), bed mesh leveling and a pressure advance / flow check. Cancelling after heating turns the heater off and records nothing.
 * `/print-lookup` searches the root [knowledge, firmware and printer registries](./troubleshooting.md) for commands, macros, errors, symptoms and printer facts. Read-only; it sends nothing.
 * `/print-macros` lists the macros the configured Moonraker printer actually defines, read live from `/printer/objects/list` and classified against the registry (see [printer macros](./macros.md)). The listing is read-only. `/print-macros run <name> [KEY=VALUE ...]` runs one live-discovered macro behind a confirmation that shows the exact script line, refusing internal (`_`-prefixed) names, unknown names, and any run while a print is running or paused. Non-Moonraker printers get a plain explanation.
 * `/print-live [start | stop | status]` runs the live camera viewing session (Discord only; see [live camera Activity](./discord-bot-setup.md#7-live-camera-activity-optional-311)). Start posts the Activity pointer for the one configured voice channel; the bot sends no video itself and records nothing. Telegram and Matrix have no live command.
@@ -201,8 +219,8 @@ chmod 600 ~/.config/myminifactory/token
 | | `stock_api_port` | `8898` | Flashforge stock API for IFS presence |
 | `discord` | `chat_id`, `approval_user_id` | empty | Channel and approver IDs |
 | | `upload_max_bytes` | `9500000` | Largest upload before video is shrunk |
-| | `post_print_quiet_s` | `7200` | Quiet time before a chat session resets |
-| | `daily_reset_hour`, `timezone` | `4`, `America/New_York` | Daily session reset |
+| | `post_print_quiet_s` | `7200` | Retired (#524): the bot no longer resets chat sessions; kept so existing configs load |
+| | `daily_reset_hour`, `timezone` | `4`, `America/New_York` | `daily_reset_hour` retired with it (#524); `timezone` is the display zone |
 | | `bot_name` | `Print Handy` | Name the bot uses in the roast persona and the rendered profile templates (`SOUL.md`, locale strings). Set it to anything, for example your old name |
 | | `question_timeout_s` | `1800` | How long a Discord question waits for a button press |
 | | `safety_confirm_timeout_s` | `600` | How long a safety confirmation (stop, resume, reboot, cold-pull go-ahead) waits |
@@ -215,7 +233,7 @@ chmod 600 ~/.config/myminifactory/token
 | | `health_port`, `health_stale_s` | `0`, `120` | Standalone bot: `GET /healthz` port (0 off) and heartbeat age limit |
 | | `sync_commands` | `true` | Standalone bot: register slash commands at startup |
 | `llm` | `chat_url`, `model`, `api_key_env`, `timeout_s` | empty, empty, `LLM_API_KEY`, `20` | Optional OpenAI-compatible model for standalone free-text replies; never starts anything itself |
-| `design` | `enabled`, `chat_url`, `model`, `api_key_env`, `timeout_s`, `repair_attempts` | unset (auto), empty, empty, empty, `180`, `3` | `/print-design` (alias `/design`) AI design (#388); `enabled` unset = auto-on when an endpoint is configured, `false` forces off; empty fields inherit `llm`; in Hermes mode the profile's `auxiliary.print_design` block picks the model instead |
+| `design` | `enabled`, `chat_url`, `model`, `api_key_env`, `timeout_s`, `repair_attempts` | unset (auto), empty, empty, empty, `180`, `3` | `/print-design` (alias `/design`) AI design (#388); `enabled` unset = auto-on when an endpoint is configured, `false` forces off; empty fields inherit `llm`; the endpoint wins in Hermes mode too, and the profile's `auxiliary.print_design` block is the fallback when no endpoint is configured |
 | `listener` | `tick_s` | `600` | Listener housekeeping interval |
 | | `ifs_presence_poll_s` | `15` | IFS spool presence poll |
 | | `spool_nag_s` | `600` | Reminder interval for an unanswered spool question |
@@ -229,8 +247,9 @@ chmod 600 ~/.config/myminifactory/token
 | | `vertical_short`, `vertical_short_mode`, `vertical_short_overlay` | `false`, `pad`, `true` | Optional 9:16 vertical short posted alongside each timelapse (#317); mode is the blurred-pad or centre-crop framing, overlay burns in the title/printer/filament/time text |
 | `logging` | `level`, `format`, `file` | `INFO`, `text`, empty | Log verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`), `text` or `json` lines, and an optional rotating log file |
 | `maintenance` | `quick_hours`, `full_hours`, `full_days` | `25`, `75`, `30` | When maintenance reminders come due |
-| `nozzle_temp_offsets` | supported nozzle type | `0.0` | Optional temperature compensation from −10 to +15 °C for a known nozzle type |
-| `material_temps` | PLA, PETG, ABS, ASA, TPU, PA, PC (`nozzle`, `bed`) | see `config/home.yaml` | Configurable fallback temperatures in °C; explicit Spoolman filament settings take precedence |
+| `nozzle_temp_offsets` | supported nozzle type | steel types `5.0`, others `0.0` | Temperature compensation from −10 to +15 °C for a known nozzle type; the per-type default applies generically to every filament baseline, and a value here overrides that type's default |
+| `material_temps` | PLA, PETG, ABS, ASA, TPU, PA, PC (`nozzle`, `bed`) | see `config/home.yaml` | Configurable fallback temperatures in °C; explicit Spoolman filament settings take precedence. Named variants adjust the fallback (#512): Silk PLA +10 °C and 0.7× outer-wall speed, PLA+ / Matte PLA / *-CF / *-GF +5 °C (PA-CF +10 °C), Matte PLA 0.9× outer-wall speed |
+| `spool` | `prompt_brand` | `false` | Ask for brand/vendor in the new-spool walkthrough (#512); off by default, brand is skipped |
 | `cold_pull` | profile name | `pla_trial = [220, 90]`, `petg = [245, 100]` | Hot and cold temperatures in °C; profile names are configurable |
 
 ## Install and update
