@@ -1,7 +1,7 @@
 # Docs sync needed
 
 The docs sync check found drift between this site and the source of truth,
-[`catduckgnaf/print-buddy/docs`](https://github.com/catduckgnaf/print-buddy/tree/main/docs)
+[`catduckgnaf/print-handy/docs`](https://github.com/catduckgnaf/print-handy/tree/main/docs)
 on main.
 
 ## Drift found
@@ -24,8 +24,8 @@ DRIFT_REPORT
 ## Wiki check — required, per page
 
 Anything updated goes through a check to see if the wiki should be
-updated. The GitHub wiki for `catduckgnaf/print-buddy`
-([Home](https://github.com/catduckgnaf/print-buddy/wiki),
+updated. The GitHub wiki for `catduckgnaf/print-handy`
+([Home](https://github.com/catduckgnaf/print-handy/wiki),
 `_Sidebar`, `Discord-Bot-Setup` and any pages linked from them) points
 readers at guides and may summarise them, so a changed guide can make a
 wiki page stale.

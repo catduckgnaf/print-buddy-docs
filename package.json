@@ -1,8 +1,8 @@
 {
-  "name": "print-buddy-docs",
+  "name": "print-handy-docs",
   "version": "1.0.0",
   "private": true,
-  "description": "Print Buddy documentation site",
+  "description": "Print Handy documentation site",
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
