@@ -123,7 +123,12 @@ def add_sidebar_entry(site_name, title):
     close = next(
         i for i in range(group, len(lines)) if lines[i].strip() == "],")
     indent = re.match(r"\s*", lines[close - 1]).group(0)
-    lines.insert(close, f"{indent}{{ text: '{title}', link: {link} }},\n")
+    # The title is free text from the guide's first heading, interpolated
+    # into a single-quoted JS string: escape backslashes first, then
+    # apostrophes, so a heading like "Cloudflare's free tier" cannot
+    # break the generated config (that is what failed the 2.2.0 build).
+    js_title = title.replace("\\", "\\\\").replace("'", "\\'")
+    lines.insert(close, f"{indent}{{ text: '{js_title}', link: {link} }},\n")
     CONFIG.write_text("".join(lines))
 
 
