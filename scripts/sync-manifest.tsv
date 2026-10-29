@@ -2,7 +2,7 @@
 # upstream_file<TAB>site_file<TAB>upstream_sha256_at_last_sync
 # Source of truth: catduckgnaf/print-handy docs/ on main. Last synced from the rename tree (PR #471 in the former print-buddy repo, head f5512fa, pre-merge); hashes re-sync on the next upstream sync after the rename merges.
 # Update the hash column only when the site copy in docs/ is re-synced from upstream.
-README.md	guide.md	3181f6a1e88b61a600ac2dabc700606d6dfe6540bfb444a8d919087b82c82ef5
+README.md	guide.md	a1f970339c8ad2cde1d83e0754b371af88dd0fb6a73b84e588192bb8384ee34e
 STANDALONE.md	standalone.md	6970a2287afa4f63879223d7d1ff7b14e9c7ebead2e9aada66ee68db2978e9c8
 DOCKER.md	docker.md	8a04f9ee1281936bf6a906c9a23075d43457eb54303780930bf6435d9d98c631
 INSTALL.md	install.md	f9afb33f4a26ad435fbb8e80bab745c02d707a8f711cac98e532ee0e794a9a7f
@@ -11,10 +11,10 @@ BAMBU-A1-DOCKER.md	bambu-a1-docker.md	adf99258d50b51c9507c83c4dd16ab5543ccb2fff9
 DISCORD-BOT-SETUP.md	discord-bot-setup.md	91517c9897c19b41b7021765073b71c87ba39d72b13502985f40a3b7da96a2d6
 TELEGRAM-BOT-SETUP.md	telegram-bot-setup.md	2f2c389d6e82651290327a18cb5d5b1610ff11297e80239c7ec403ee9bbed035
 MATRIX-BOT-SETUP.md	matrix-bot-setup.md	e100618959a166aae6b1745fc4103559d106e5a4bf62ee1c8370adbf2a14ae37
-GUIDED-SETUP-DEBUGGING.md	guided-setup-debugging.md	e05f6d322ccb9a2842bb5f8074462bb29c8eea63b62d48a1e1b1bffdee23474c
+GUIDED-SETUP-DEBUGGING.md	guided-setup-debugging.md	a4e22be438e6d576828933e96a19e58b13a50f74c4b2374d2f3f3b9c84fc2a19
 CONFIGURATION-YAML.md	configuration-yaml.md	bd462639c4c3f5dd44d97c6be7ab4a0b87b65ab85014ba6ca399cdd5d2a66f49
 SETTINGS.md	settings.md	c2e2e25f5c28a470d99a18973ff08833d84f7d39e85d3d696da8eb168e48cd67
-WEBUI.md	webui.md	dc2e01158bc13b6b467323c2d354933f12141d27afa3c7398c3dcd7bebd8ad01
+WEBUI.md	webui.md	cf345be78fda386814b84399fd6b8b79f247c68b72a409f83825731cc23ecb71
 PROJECT-REFERENCE.md	project-reference.md	c2975e0b86a273941e8d1ad06080d19cacc68776d929f764f10ced2d2b795885
 LISTENERS.md	listeners.md	95dd2c900eab99737d5ae82d0d6550f6a2d36a380cffa764b5670e9f5f87d74e
 PRINTER-PROFILES.md	printer-profiles.md	8a48280c803fc82034511253f98281ced920ca4f08566a4b40ba04703d25ca11

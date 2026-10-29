@@ -45,6 +45,7 @@ features:
 
 - [Introduction](/guide) — the documentation index and how to find the right guide.
 - [Docker](/docker) — the single-container install: bot, listener and bundled Spoolman in one image.
+- [Web UI](/webui) — optional local status, settings, designs, and a read-only sliced-layer view. It is off by default, and it does not start a print.
 - [Discord bot setup](/discord-bot-setup) — create your Discord application and bot, and hand Print Handy the token and IDs safely.
 - [Printer profiles](/printer-profiles) — supported printers, delivery methods and verification limits.
 - [Troubleshooting](/troubleshooting) — troubleshoot by symptom.
