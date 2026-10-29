@@ -16,6 +16,31 @@ models; Print Handy has first-class profiles for all five
 Nothing in this table is live-hardware tested: every profile is offline-verified,
 the same treatment the AD5X support has.
 
+## Audited ZMod version
+
+Print Handy's ZMod contracts were last audited against **ZMod 1.7.5**
+(released 2026-10-27; the feature-by-feature audit is
+[#562](https://github.com/catduckgnaf/print-handy/issues/562)). The audit
+found no change to the contracts Print Handy relies on for the .gcode files
+it delivers — 1.7.5's headline features (3MF support, instant colour
+mapping without the `FORCE_MD5` preprocessor, fast KAMP data) apply to the
+3MF path, not the .gcode + MD5 path Print Handy uses, and no `START_PRINT`
+signature, `SAVE_ZMOD_DATA` variable, timelapse, camera or `notify` change
+is recorded upstream. The next ZMod release diffs against this 1.7.5
+baseline.
+
+`/print-firmware` reports the installed ZMod version for a ZMod printer,
+read from the `zmod` component in Moonraker's update status (ZMod names it
+`Z-Mod`). On the printer itself that component is a git checkout Moonraker
+cannot read, so it reports `?`; Print Handy then reads the version from the
+OS distribution in `/machine/system_info`, which ZMod names like
+`zmod 1.7.5 -> 1.7.5-2` (base -> installed), and says so in the report. When
+neither source names a version it states "ZMod version unknown". `?` is never
+treated as a version or as an available update. The doctor
+reports it too, on its own `zmod version` row, so the diagnostics bundle
+carries it into bug reports. Print Handy never guesses a version and
+never gates printing on it.
+
 ## How the models differ
 
 All five models speak the same ZMod language — Moonraker transport and ZMod's
@@ -64,6 +89,52 @@ The filament system is where they part:
   enclosed frame, active chamber heating (65 °C) and air filtration over the base
   Creator 5; the print geometry and tool model are identical, and its template
   records the chamber and filtration support.
+
+## Print file format: `.gcode` or `.gcode.3mf` (#564)
+
+What reaches the printer is Print Handy's own sliced output either way — a
+downloaded print file is never sent as-is; everything is resliced locally first.
+`[printer] zmod_delivery_format` chooses the container it travels in:
+
+- **`auto` (the default)**: the sliced job is packaged as a `.gcode.3mf` when the
+  printer reports **ZMod 1.7.5 or newer**, and sent as plain `.gcode` when the
+  version is older or cannot be read.
+- **`gcode`**: always plain `.gcode`, exactly as before this setting existed.
+- **`3mf`**: always the package, even below the version floor (an operator
+  override for printers whose ZMod was updated out of band).
+
+The package wraps the finalized `.gcode` byte-for-byte (`Metadata/plate_1.gcode`
+inside the zip, with the plate metadata and an MD5 sidecar). Its
+`Metadata/slice_info.config` names each used filament with its slot id, type
+and colour, plus the print time, weight and printer model, in the shape
+OrcaSlicer's own sliced export uses: that file is where ZMod reads the colours
+it maps to the IFS slots and the details Fluidd/Mainsail show. Every check Print
+Handy runs — verification, colour mapping, mesh and readiness guards — still
+runs on that `.gcode` before packaging, and the `.gcode` stays the artifact of
+record for reprints, slot remaps and print records. The job and print records
+note which format a print used.
+
+Why 3MF at all: per ZMod's own documentation for 1.7.5+, a `.gcode.3mf` makes
+colour scanning and mapping instant (the `.gcode` path's preprocessor step does
+not run), `FORCE_MD5` "only applies when sending G-code" so no MD5 pass is
+needed, and KAMP data is available instantly instead of after a scan. The floor
+is 1.7.5 because that is the release whose changelog adds 3MF colour mapping;
+below it, the same package would buy nothing and risk the older firmware
+misreading it, so `auto` stays on `.gcode` there.
+
+Two boundaries to know:
+
+- **Slot remaps happen before packaging.** Print Handy's `/print-again`
+  slot remap rewrites the `.gcode` (mapping metadata and checksum) and the
+  result is then packaged like any other job. A file already on the printer
+  can still be remapped from the printer's own screen — that is ZMod's
+  domain and works the same for both formats.
+- **Nothing here is live-hardware verified yet.** The format behaviour above
+  is pinned by offline tests and ZMod's published documentation; the
+  on-printer checks (starting a packaged print on 1.7.5, Fluidd/Mainsail
+  listing metadata, the native screen's display of a packaged print, and
+  timelapse markers inside one) are listed on issue #564 for the first
+  operator who runs them.
 
 ## Bundled Spoolman from printer Moonraker (#443)
 

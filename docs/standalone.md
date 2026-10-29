@@ -34,7 +34,7 @@ message. `python3 -m print_handy.doctor` warns when a Hermes profile holds the s
 
 | Key | Default | What it does |
 |---|---|---|
-| `bot.mode` | `hermes` | `standalone` runs `python3 -m print_handy.bot` with no Hermes. `hermes` keeps the gateway plugin |
+| `bot.mode` | `standalone` | `standalone` runs `python3 -m print_handy.bot` with no Hermes; it is the default when a config does not state a mode (#524). `hermes` keeps the gateway plugin on installs that state it explicitly |
 | `bot.platform` | `discord` | The chat platform the standalone bot talks to (#164): `discord`, `telegram` or `matrix`. A config without this key keeps `discord` |
 | `telegram.token_env` | `TELEGRAM_BOT_TOKEN` | Name of the environment variable that holds the Telegram bot token |
 | `telegram.chat_id` | empty | The print chat. Group and channel IDs are negative. The bot ignores every other chat (forum topics inside it work like threads) |
@@ -175,6 +175,8 @@ Required environment: `PRINT_HANDY__BOT__MODE=standalone`, `DISCORD_BOT_TOKEN`, 
 * Slash commands: `/print-next`, `/print-stop`, `/print-resume`, `/print-again`, `/print-reboot`,
   `/print-coldpull`, `/nozzle`, `/print-maintenance`, `/print-colors`, `/spool`, `/print-lookup`, `/print-troubleshoot`,
   `/print-macros` (Moonraker printers only; lists the macros the printer defines, and `run <name>` runs one behind a confirmation),
+  `/print-firmware` (firmware version report on Moonraker printers; `update <component>` applies one component update behind a confirmation on ZMod and vanilla Klipper printers only; `guide zmod` / `guide stock` walk through the manual AD5X updates; other families get their manual update guidance),
+  `/print-calibration` (printer calibrations with before/after values and an accept step before anything saves, on ZMod and vanilla Klipper printers; Z offset is report + guide; `records` lists past runs),
   `/print-handy` (guided setup and read-only debugging), `/print-help`. Typing the same text works too.
 * `/print-design <what to make>` (or the short `/design`) designs a new part with AI + OpenSCAD (see
   [AI design](./design.md)); with a model file dropped in the same message, or a model link in it, it edits
@@ -249,7 +251,8 @@ inherits the `[llm]` endpoint when `[design]` is unset, and that inheritance kee
 off — design has its own switch (`design.enabled`). Two other features use a model through the
 separate vision endpoint, not the chat fallback, and keep their own gates: the print-started **roast**
 (`vision.roast_enabled`, on by default) and the **camera watchdog** (`visual_watch.enabled`, on
-`services.vision_chat_url`). Turning the chat LLM off changes none of them; turn each off at its own
+`services.vision_chat_url` — or, with no endpoint at all, on the built-in local failure detector,
+`vision.local_detector_enabled`, #455). Turning the chat LLM off changes none of them; turn each off at its own
 switch if you want no model calls at all.
 
 ## Hermes pieces and their replacement
@@ -259,7 +262,7 @@ switch if you want no model calls at all.
 | `pre_gateway_dispatch` hook with the plugin's handlers | `print_handy.bot.router.Router` calls the plugin's `register()` and runs the same handlers in the same order. `receive_ack` (a receipt promising an agent reply) is skipped, since no agent follows |
 | Gateway authorization (`_is_user_authorized_for_source`), delivery adapter, session key | `print_handy.bot.runtime.Gateway`: allowed user IDs plus the print channel; replies go to the same channel or thread; one session per person per channel |
 | Adapter `send` / `send_clarify` | The platform interface in `print_handy.bot.platform` (#164): `send`, `send_clarify`, `answer_typed`, `close_prompt`, `is_allowed_id`, plus per-platform limits (`message_limit`, `upload_max_bytes`, `supports_buttons`, `max_buttons`). Discord's implementation is `print_handy.bot.adapter.StandaloneAdapter` over discord.py. `MEDIA:/path` becomes an attachment; long text is split at 2000 characters |
-| Clarify gateway (register, wait, resolve, cancelled) | `print_handy.core.prompts`, the same API. `prompts.gateway()` picks Hermes' module under Hermes and this one in standalone mode, so the shared handlers work in both |
+| Clarify gateway (register, wait, resolve, cancelled) | `print_handy.core.prompts`, the same API; standalone always draws its own questions with it. Under Hermes, Hermes' adapter draws questions by default; with `discord.clarify_ui = true` the plugin's own renderer draws them there too (#524): questions are posted by Discord REST from the bot's own registry, clicks and typed answers are resolved by the bot, and an answered question edits in place ("you chose X", buttons removed), exactly as standalone renders. On that path the locale hint patch and the Stop-view substitution stand down — they only compensate for host-drawn questions |
 | Platform handler registration and the adapter's `_is_allowed_user` | The router hands the plugin's `alert_button_handlers` our discord.py client; the adapter implements `_is_allowed_user` |
 | `hermes send` subprocess in the listener | `print_handy.bot.rest.send`: Discord REST with the bot token, `MEDIA:` files as attachments. Since #524 this is the listener's Discord post path in Hermes mode too — no `hermes send` subprocess remains anywhere |
 | Hermes `state.db` messages for "print it" | `print_handy.bot.recent_links`: the last model link per channel in `<state>/recent_model_links.json`. This file is the single source in both modes (#524); `state.db` is no longer read for link recall |
@@ -267,6 +270,13 @@ switch if you want no model calls at all.
 | Profile `auxiliary.print_design` pin answering /print-design | The `[design]`/`[llm]` HTTP transport in both modes (#524): the configured endpoint answers; the profile pin is only the fallback when no endpoint is configured |
 | Tool-call hooks (`pre_tool_call`, `post_tool_call`) | Not needed: they only guard an agent's tool calls. Kept registered for Hermes |
 | Hermes home, install script, systemd units, restart drop-in | `paths.hermes_home` is just the data folder; `scripts/install-standalone.sh` and `systemd/*.service.template` with no gateway coupling |
+
+Standalone needs no Hermes profile at all — not a dedicated one, not any other kind. That is
+not because the bot's restrictions are stronger here: it is because there is no agent behind
+the bot, so a message no handler claims simply ends instead of falling through to an
+assistant. Hermes mode keeps that fall-through on purpose, which is why it requires a
+dedicated profile — see
+[docs/INSTALL.md](./install.md#why-hermes-mode-needs-a-dedicated-profile-any-name).
 
 ## Moving from Hermes
 
