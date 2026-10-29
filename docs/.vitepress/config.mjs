@@ -80,6 +80,8 @@ export default defineConfig({
         items: [
           { text: 'Printer Profiles', link: '/printer-profiles' },
           { text: 'Flashforge AD5X', link: '/ad5x-contract' },
+          { text: 'Best practices on specific devices', link: '/device-best-practices' },
+          { text: 'AD5X best practices', link: '/device-ad5x' },
           { text: 'Stock Flashforge', link: '/flashforge-stock' },
           { text: 'Bambu Lab', link: '/bambu-lab' },
           { text: 'Prusa', link: '/prusa' },
