@@ -23,10 +23,13 @@ Do not run both Discord modes with the same token. Installing, enabling services
 - [Settings reference](./settings.md): every setting with its YAML key, environment variable and Docker value, plus Docker build arguments and secrets.
 - [Detailed project reference](./project-reference.md): workflow examples, commands, printer models, spool identity rules, monitoring and updates.
 - [Printer macros](./macros.md): `/print-macros` live macro discovery on Moonraker printers, and the per-vendor macro matrix.
+- [Firmware updates](./firmware-update.md): `/print-firmware` version reporting, guarded component updates on ZMod and vanilla Klipper, the guided ZMod base / stock firmware flows, and the per-family update matrix for every other printer.
+- [Printer calibration](./calibration.md): `/print-calibration` — the before/after accept pattern (before values, confirm, run idle-only, new values and differences, accept before anything saves), per-calibration notes for mesh, screws, PID, input shaper, belts and the Z-offset report/guide verdict, and calibration records.
 - [Printer profiles and offline delivery](./printer-profiles.md): vendor/model inheritance, supported delivery methods and verification limitations.
 - [Printer support](./printer-support.md): what "supported" means for each printer, how to try one that is not listed, what a built-in printer consists of, and the hardware checklist for confirming a listed printer works.
 - [Optional Flash Studio slicer](./flash-studio.md): opt-in, user-installed Flash Studio executable for Flashforge printers; an empty path keeps the normal OrcaSlicer choice.
 - [Home Assistant panic and printer controls](https://github.com/catduckgnaf/print-handy/blob/main/docs/home-assistant-panic.md): direct, no-LLM AD5X/ZMod printer controls from a Home Assistant dashboard, including the emergency-stop panic restart; no extra daemon.
+- [Best practices on specific devices](./device-best-practices.md): per-printer recommended settings, the order to change them in, and what has been verified on hardware. Starts with [AD5X best practices](./device-ad5x.md): screenless with HelixScreen, ZMod version, Z offset, bed mesh and KAMP, Nopoop purge, QuickSwap order and risks, 3MF delivery.
 - [AD5X integration contract](./ad5x-contract.md): printer-specific behavior and limitations.
 - [ZMod printers](./zmod.md): all five ZMod models (AD5X, AD5M, AD5M Pro supported; Creator 5 / 5 Pro staged), and how their filament systems differ.
 - [Stock Flashforge printers](./flashforge-stock.md): the Adventurer 5X on factory firmware — the LAN HTTP API, IFS prints, the launched-print monitor, and timelapse from the camera source the printer advertises (the AD5X has no built-in camera; read the verification status before expecting a video).
@@ -37,6 +40,7 @@ Do not run both Discord modes with the same token. Installing, enabling services
 - [Elegoo printers](./elegoo.md): the Neptune 4 family on Moonraker and the Centauri Carbon on SDCP, generating slicer profiles from your own OrcaSlicer, the SDCP LAN client (status, verified upload, gated start), and what is not supported.
 - [Qidi printers](./qidi.md): the Klipper line (Q1 Pro, X-Plus 3, X-Plus 4, X-Max 3, X-Smart 3) on Moonraker, generating slicer profiles from your own OrcaSlicer, and what is not supported.
 - [Creality printers](./creality.md): the Klipper/Creality OS line (Ender-3 V3 series, K1 series) on Moonraker, generating slicer profiles from your own OrcaSlicer, why Marlin Enders are not this vendor, and what is not supported.
+- [Anycubic printers](./anycubic.md): the Klipper-based Kobra 2 family on Moonraker-exposed firmware (the stock-firmware caveat stated up front), generating slicer profiles from your own OrcaSlicer, why the Kobra 3 / S1 generation and the Marlin models are not this vendor, and what is not supported.
 - [Read-only mesh topology audit](./mesh-audit.md): topology metrics, CLI usage, and manifold/watertight checks.
 - [100%-scale geometry layout and export](./geometry-layout.md): multi-object single-plate packing, status ladder, and geometry-only export boundaries.
 - [Opt-in reviewed CAD split plans and dowel connectors](./cad-split-plans.md): reviewed split presets, chamfered dowel generation, OpenSCAD CSG script synthesis, and post-boolean volume conservation checks.
