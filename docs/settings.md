@@ -13,13 +13,16 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 |---|---|---|---|
 | `layout.single_copy_edge_mm` | `PRINT_HANDY__LAYOUT__SINGLE_COPY_EDGE_MM` | `1.0` *model* | Bed-edge clearance for one copy |
 | `layout.multi_copy_edge_mm` | `PRINT_HANDY__LAYOUT__MULTI_COPY_EDGE_MM` | `3.0` *model* | Bed-edge clearance for several copies |
-| `layout.merge_edge_margin_mm` | `PRINT_HANDY__LAYOUT__MERGE_EDGE_MARGIN_MM` | `8.0` *model* | Edge margin when merging plates |
-| `layout.merge_spacing_mm` | `PRINT_HANDY__LAYOUT__MERGE_SPACING_MM` | `10.0` *model* | Gap between merged plates' parts |
+| `layout.spacing` | `PRINT_HANDY__LAYOUT__SPACING` | `minimum` | Part gap and margin preset: `minimum`, `low`, `medium` (Standard) or `high`; fills the seven gap keys below (see [Part spacing presets](#part-spacing-presets)) |
+| `layout.arrange_gap_mm` | `PRINT_HANDY__LAYOUT__ARRANGE_GAP_MM` | `2.0` *preset* | Gap between parts rearranged onto one plate |
+| `layout.arrange_edge_mm` | `PRINT_HANDY__LAYOUT__ARRANGE_EDGE_MM` | `1.0` *preset* | Bed-edge margin for parts rearranged onto one plate (a job's brim is added on top) |
+| `layout.merge_edge_margin_mm` | `PRINT_HANDY__LAYOUT__MERGE_EDGE_MARGIN_MM` | `1.0` *preset* | Edge margin when merging plates |
+| `layout.merge_spacing_mm` | `PRINT_HANDY__LAYOUT__MERGE_SPACING_MM` | `2.0` *preset* | Gap between merged plates' parts |
 | `layout.max_merged_hours` | `PRINT_HANDY__LAYOUT__MAX_MERGED_HOURS` | `12` | Merged plates longer than this stay separate |
 | `prime_tower.size_mm` | `PRINT_HANDY__PRIME_TOWER__SIZE_MM` | `45.0` *model* | Prime tower size |
-| `prime_tower.part_clearance_mm` | `PRINT_HANDY__PRIME_TOWER__PART_CLEARANCE_MM` | `8.0` *model* | Prime tower to part clearance |
-| `prime_tower.edge_mm` | `PRINT_HANDY__PRIME_TOWER__EDGE_MM` | `10.0` *model* | Prime tower to bed edge clearance |
-| `prime_tower.merge_slack_mm` | `PRINT_HANDY__PRIME_TOWER__MERGE_SLACK_MM` | `5.0` *model* | Extra room kept for the tower when merging |
+| `prime_tower.part_clearance_mm` | `PRINT_HANDY__PRIME_TOWER__PART_CLEARANCE_MM` | `3.5` *preset* | Prime tower to part clearance |
+| `prime_tower.edge_mm` | `PRINT_HANDY__PRIME_TOWER__EDGE_MM` | `4.0` *preset* | Prime tower to bed edge clearance |
+| `prime_tower.merge_slack_mm` | `PRINT_HANDY__PRIME_TOWER__MERGE_SLACK_MM` | `1.0` *preset* | Extra room kept for the tower when merging |
 | `printer.firmware` | `PRINT_HANDY__PRINTER__FIRMWARE` | `ZMod Klipper` *model* | Firmware label shown in job summaries |
 | `printer.start_macro` | `PRINT_HANDY__PRINTER__START_MACRO` | `START_PRINT` *model* | Klipper start macro for stock Klipper models |
 | `printer.end_macro` | `PRINT_HANDY__PRINTER__END_MACRO` | `END_PRINT` *model* | Klipper end macro for stock Klipper models |
@@ -36,7 +39,7 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 | `slicer.flash_studio_path` | `PRINT_HANDY__SLICER__FLASH_STUDIO_PATH` | empty | Optional path to a Flash Studio executable the user already installed. Empty keeps OrcaSlicer. A set but missing or non-executable path is an error, not a fallback. Never downloaded or bundled. |
 | `printer.nozzle_type` | `PRINT_HANDY__PRINTER__NOZZLE_TYPE` | unset | Optional nozzle material, limited to the model's supported types |
 | `orca.templates` | `PRINT_HANDY__ORCA__TEMPLATES` | the model's folder *model* | Folder with the Orca machine, process and filament JSON |
-| `orca.command` | file only | `["/usr/local/bin/orca-slicer"]` | How to start the OrcaSlicer CLI; `PRINT_HANDY_ORCA_CHANNEL` selects stable (default) or alpha; both binaries exist only when `WITH_ORCA=true` |
+| `orca.command` | file only | `["/usr/local/bin/orca-slicer"]` | How to start the OrcaSlicer CLI; `PRINT_HANDY_ORCA_CHANNEL` selects stable (default) or preview (`alpha` is still accepted as the old name for `preview`); both binaries exist only when `WITH_ORCA=true` |
 | `delivery.methods` | `PRINT_HANDY__DELIVERY__METHODS` | `["printer"]` *model* | Post-slice options offered, from the vendor profile (for example `printer`); comma- or space-separated in the environment, an empty value keeps the file value |
 | `bambu.command` | file only | `["/usr/bin/bambu-studio"]` | Bambu Studio CLI: the default slicer for Bambu Lab printers, Orca's one-shot fallback elsewhere; exists only in a `WITH_BAMBU=true` image |
 | `bambu.lan_host` | `PRINT_HANDY__BAMBU__LAN_HOST` | `""` | Bambu Lab printer LAN address for read-only status (#187); must be set together with `lan_serial`; empty disables LAN status |
@@ -61,7 +64,7 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 | `services.camera_snapshot_url` | `PRINT_HANDY__SERVICES__CAMERA_SNAPSHOT_URL` | empty | Camera snapshot URL; derived from the Moonraker host when empty |
 | `services.spoolman_url` | `PRINT_HANDY__SERVICES__SPOOLMAN_URL` | empty | Spoolman URL. The Docker config and Compose default to `http://127.0.0.1:8000`, the bundled Spoolman API in the same container. Set another URL, plus `PRINT_HANDY_BUNDLED_SPOOLMAN=false`, to use an existing external Spoolman instead |
 | `services.openviking_url` | `PRINT_HANDY__SERVICES__OPENVIKING_URL` | empty | Optional OpenViking memory store |
-| `services.vision_chat_url` | `PRINT_HANDY__SERVICES__VISION_CHAT_URL` | empty | OpenAI-compatible endpoint for camera checks and roasts; empty disables both |
+| `services.vision_chat_url` | `PRINT_HANDY__SERVICES__VISION_CHAT_URL` | empty | OpenAI-compatible endpoint for camera checks and roasts; empty disables both. Needs a vision-capable model. See [Model endpoints](#model-endpoints) |
 | `services.stock_api_port` | `PRINT_HANDY__SERVICES__STOCK_API_PORT` | `8898` | Flashforge stock API port for IFS presence |
 | `services.octoprint_url` | `PRINT_HANDY__SERVICES__OCTOPRINT_URL` | empty | OctoPrint printers (`octoprint.marlin`): OctoPrint URL. API key: `OCTOPRINT_API_KEY` secret |
 | `discord.chat_id` | `PRINT_HANDY__DISCORD__CHAT_ID` | empty | Discord channel ID |
@@ -97,7 +100,7 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 | `bot.health_port` | `PRINT_HANDY__BOT__HEALTH_PORT` | `0` | Serve `GET /healthz` on this port; `0` turns the HTTP check off |
 | `bot.health_stale_s` | `PRINT_HANDY__BOT__HEALTH_STALE_S` | `120` | Bot health fails when its heartbeat is older than this |
 | `bot.sync_commands` | `PRINT_HANDY__BOT__SYNC_COMMANDS` | `true` | Register the slash commands with Discord at startup |
-| `llm.chat_url` | `PRINT_HANDY__LLM__CHAT_URL` | empty | Optional OpenAI-compatible chat URL; empty: unmatched text gets the command list |
+| `llm.chat_url` | `PRINT_HANDY__LLM__CHAT_URL` | empty | Optional OpenAI-compatible chat URL; empty: unmatched text gets the short "didn't understand" reply. See [Model endpoints](#model-endpoints) |
 | `llm.model` | `PRINT_HANDY__LLM__MODEL` | empty | LLM model name, required when `chat_url` is set |
 | `llm.api_key_env` | `PRINT_HANDY__LLM__API_KEY_ENV` | `LLM_API_KEY` | Name of the environment variable holding the LLM API key |
 | `llm.timeout_s` | `PRINT_HANDY__LLM__TIMEOUT_S` | `20` | LLM request timeout |
@@ -115,8 +118,8 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 | `listener.ifs_presence_poll_s` | `PRINT_HANDY__LISTENER__IFS_PRESENCE_POLL_S` | `15` | IFS spool presence poll |
 | `listener.spool_nag_s` | `PRINT_HANDY__LISTENER__SPOOL_NAG_S` | `600` | Reminder interval for an unanswered spool question |
 | `listener.start_claim_ttl_s` | `PRINT_HANDY__LISTENER__START_CLAIM_TTL_S` | `1800` | How long a start button stays claimed |
-| `vision.model` | `PRINT_HANDY__VISION__MODEL` | `gemini-latest` | Model for camera checks |
-| `vision.roast_model` | `PRINT_HANDY__VISION__ROAST_MODEL` | `luna-latest` | Model for the print-start roast |
+| `vision.model` | `PRINT_HANDY__VISION__MODEL` | `gemini-latest` | Model for camera checks. The default is a CLIProxyAPI alias: set your own server's vision model name |
+| `vision.roast_model` | `PRINT_HANDY__VISION__ROAST_MODEL` | `luna-latest` | Model for the print-start roast. The default is a CLIProxyAPI alias: set your own server's model name |
 | `vision.roast_enabled` | `PRINT_HANDY__VISION__ROAST_ENABLED` | `true` | The one-line roast on the print-started post only (never on the completion post), on every platform (Telegram included). On by default: it runs whenever an LLM/vision endpoint is available (`services.vision_chat_url` plus `CLIPROXY_API_KEY`); `false` turns roasts off without disabling camera checks |
 | `vision.local_detector_enabled` | `PRINT_HANDY__VISION__LOCAL_DETECTOR_ENABLED` | `false` | Built-in local failure detector for the camera watchdog (#455): when `true`, frames are judged by an ONNX detector on this machine whenever no vision endpoint route is configured, so a no-LLM, no-cloud install still gets bad-print detection. Off by default; see [Local failure detector](#local-failure-detector) |
 | `vision.local_model_path` | `PRINT_HANDY__VISION__LOCAL_MODEL_PATH` | empty | Path of the local detector's ONNX model file. Empty uses the default location (a `models` folder under the Hermes home) and the pinned model; set it to a file you placed yourself to run fully offline |
@@ -174,6 +177,66 @@ Schema, validation limits and TOML migration: [CONFIGURATION-YAML.md](./configur
 **Photo label intake (#514).** When any label-reading route is available, the new-spool walkthrough's first step also offers **Use a photo of the label**. The operator sends one photo of the spool's box or sticker as the next message in the channel, and the routes are tried in a fixed order: (1) the label's own **barcode/QR code**, decoded locally with the zxing-cpp library (a runtime dependency) — deterministic data the manufacturer printed; (2) the **vision endpoint** — the same availability rule the camera watchdog uses: `PRINT_VISION_URL` set, or `services.vision_chat_url` with its key; (3) **local OCR** with the tesseract binary (installed in the shipped container image; elsewhere, install `tesseract-ocr` to enable it), matched against the known filament types and the material/colour/brand vocabulary labels are printed from. The first route that reads a complete spec wins; partial results are never merged across routes. Every route extracts the same fields — brand, material (with sub-type), colour/blend, net weight and, when printed, the recommended nozzle/bed temperatures — and the values pre-fill the walkthrough at its confirmation step, which names the route that read them. Nothing is created from a photo without that confirmation, and Edit details walks the normal steps instead. A photo no route can use refuses with the reason and falls back to the manual steps. Label temperatures are recorded on the Spoolman filament the spool is created with, so they win over material defaults exactly like temperatures entered in Spoolman itself, for every material; a filament type that already exists keeps the temperatures it already has. The photo itself is never stored or recorded: it goes only to the one route that reads it (a local decoder, a local binary, or the configured vision endpoint). With no route available the button is not offered and the walkthrough is unchanged. The guided `/spool` flow does not offer the photo step: its gateway prompts answer with buttons or text and cannot carry an attachment.
 | `cold_pull.<profile>` | file only | from the vendor profile *model* | Hot and cold cold-pull temperatures; profile names are yours |
 
+## Model endpoints
+
+Every model feature talks to an **OpenAI-compatible chat completions** endpoint
+(`POST .../v1/chat/completions`), so any provider or local server that speaks
+that API works: OpenAI, OpenRouter, Cloudflare Workers AI, a CLIProxyAPI
+instance, or a local server such as Ollama, LM Studio, llama.cpp or vLLM.
+Nothing requires Hermes; the standalone bot (Discord, Telegram or Matrix)
+reads these settings directly.
+
+| Feature | URL | Model | Key |
+| --- | --- | --- | --- |
+| Plain-language chat (Discord) | `llm.chat_url` | `llm.model` | the variable named by `llm.api_key_env` (default `LLM_API_KEY`), optional |
+| AI design (`/print-design`) | `design.chat_url`, else `llm.chat_url` | `design.model`, else `llm.model` | `design.api_key_env`, else `llm.api_key_env` |
+| Camera watchdog, spool label photos | `services.vision_chat_url` | `vision.model` | `CLIPROXY_API_KEY` |
+| Print-start roast | `services.vision_chat_url` | `vision.roast_model` | `CLIPROXY_API_KEY` |
+
+Things to know:
+
+- **Keys are optional where the server needs none.** Chat and design send a
+  key only when one is set. The vision route needs `CLIPROXY_API_KEY` for a
+  hosted endpoint, but not for one on this machine or your LAN (loopback or
+  private address, `localhost`, a Docker service name like `ollama`, or a
+  `.local` / `.lan` / `.home.arpa` name), since a local server usually takes
+  no key. A hosted vision URL without its key keeps the camera watch off
+  rather than posting a false alert at every check.
+- **Set the model names.** `vision.model` and `vision.roast_model` default to
+  `gemini-latest` and `luna-latest`, aliases that only a CLIProxyAPI setup
+  knows. With any other server, set them to that server's model names, and
+  pick a vision-capable model for `vision.model`.
+- **The URL is the full chat completions path**, for example
+  `http://ollama:11434/v1/chat/completions` for an Ollama container or
+  `https://api.openai.com/v1/chat/completions`.
+- Running all of this on Cloudflare's free tier is covered in
+  [Cloudflare](./cloudflare.md).
+
+## Part spacing presets
+
+`layout.spacing` picks every part gap and margin at once. Every fit check, the automatic one-plate rearrangement, the multicolor merge (with its prime tower) and slicing use the same resolved values, so Print Handy only offers a layout the slicer will produce. A key set explicitly (in the YAML file or as its environment variable) wins over the preset; the others follow the preset.
+
+| Preset | arrange gap / edge | merge spacing / edge margin | tower to part / bed edge | tower slack |
+|---|---|---|---|---|
+| `minimum` (default) | 2.0 / 1.0 | 2.0 / 1.0 | 3.5 / 4.0 | 1.0 |
+| `low` | 3.5 / 3.0 | 6.0 / 4.5 | 6.0 / 7.0 | 3.0 |
+| `medium` (Standard) | 5.0 / 5.0 | 10.0 / 8.0 | 8.0 / 10.0 | 5.0 |
+| `high` | 7.5 / 7.5 | 15.0 / 12.0 | 12.0 / 15.0 | 7.5 |
+
+Columns, in mm: `layout.arrange_gap_mm` / `layout.arrange_edge_mm`, `layout.merge_spacing_mm` / `layout.merge_edge_margin_mm`, `prime_tower.part_clearance_mm` / `prime_tower.edge_mm`, `prime_tower.merge_slack_mm`.
+
+`medium` is the fixed set Print Handy used before presets existed. `low` is halfway between `minimum` and `medium`, and `high` is 1.5 × `medium`, both rounded to 0.5 mm; use `high` for wide brims or warping materials.
+
+How `minimum` was measured: real Orca slices through Print Handy's own slice path, each checked by the offline G-code guard (`tests/slicer/test_spacing_minimums_real.py` re-checks them on every slicer CI run).
+
+- **Part gaps (2 mm):** Orca slices parts 0.5 mm apart, even with brims, which it merges. 2 mm keeps the first-layer squish from bridging neighboring parts.
+- **Bed edge (1 mm):** a part 0.5 mm from the edge slices and stays on the bed. Orca clips a brim at the bed edge instead of refusing the plate. When a job has a brim, its width is added to the margin so the whole brim stays on the bed.
+- **Prime tower to part (3.5 mm):** Orca reports a G-code conflict at 2.5 mm and accepts 3 mm.
+- **Prime tower to bed edge (4 mm):** the tower's brim and wipe moves leave the bed at 3 mm and fit at 3.5 mm.
+- **Tower slack (1 mm):** the reserved strip only speeds up packing; every tower position is still searched and proved.
+
+Skirts are off in the shipped profiles. If you enable one, raise the edge keys by the skirt distance plus its loops.
+
 ## Custom vision endpoint (PRINT_VISION_URL)
 
 The camera watchdog normally judges frames through the OpenAI-compatible `services.vision_chat_url` endpoint (with `CLIPROXY_API_KEY`). Setting the plain environment variable `PRINT_VISION_URL` — it is not a `PRINT_HANDY__` setting and has no config-file form — points the watchdog at your own detector instead: a Frigate-adjacent sidecar, an Obico-style adapter, a small ONNX service, anything that can answer one HTTP call. When it is set, it is the route used for every camera check: the OpenAI-compatible route is not consulted, no API key is needed, and the camera watch counts as having a vision endpoint. It serves camera checks and spool-label photo reads (#514) — the print-start roast still needs `services.vision_chat_url`.
@@ -185,6 +248,7 @@ The contract is deliberately small:
 - **How verdicts map:** `ok` / `safe` are healthy (a healthy verdict vetoes a pixel-diff stall alert: at every `visual_watch.sensitivity` level on the Moonraker watchdog, at 1–2 on the Bambu monitor). An `uncertain` verdict whose reason says the camera feed is dark gets the once-per-print dark-camera notice on the Moonraker watchdog instead of an alert. `air`, `spaghetti` and `detached` alert. `uncertain` also alerts — a frame that cannot be judged is treated as needing review, never as a pass. `empty_idle` is neither: an idle printer with an empty bed is expected.
 - **Timeout and failures:** Print Handy waits at most **30 seconds** for the answer. Anything that goes wrong — endpoint unreachable, timeout, an HTTP error status, or a body that is not a JSON object — degrades to verdict `uncertain` with the detail "the vision check could not be completed", so a broken endpoint produces visible alerts instead of silently passing frames. The underlying error is written to the log (`vision check failed via PRINT_VISION_URL: ...`), which is where a mis-configured URL is diagnosed.
 - **Label reads (#514):** the same endpoint may also receive the spool-label prompt (the photo intake above): the request shape is identical, the `image` is the operator's label photo, and the response body should be the JSON object the prompt describes (brand / material / color / grams / nozzle_temp / bed_temp) instead of a verdict object. An endpoint that only answers verdicts will simply fail the label read — the walkthrough refuses with the reason and falls back to its manual steps.
+- **Reference implementation:** [`examples/cloudflare/vision-verdict`](https://github.com/catduckgnaf/print-handy/blob/main/examples/cloudflare/vision-verdict/README.md) is a small Cloudflare Worker that answers this contract with a Workers AI vision model (verdicts only). Setup, free-tier usage and privacy are in [Running the AI features on Cloudflare's free tier](./cloudflare.md).
 
 ## Semantic lookup endpoint (PRINT_FUZZY_URL)
 
@@ -196,6 +260,7 @@ The contract is deliberately small:
 - **Response:** HTTP 200 with `{"matches": [{"id": "...", "text": "...", "score": 0.0–1.0}], "degraded": false}` — cosine similarities, best first. An endpoint that cannot answer says `{"matches": [], "degraded": true, "reason": "..."}`. Matches whose id is not one of the candidates sent are ignored.
 - **Threshold:** the `0.55` sent today is the reference spike's placeholder, chosen before a live corpus existed; expect to tune it against your own lookups. Scores below it are the endpoint's to drop.
 - **Timeout and failures:** Print Handy waits at most **10 seconds**. Anything that goes wrong — unreachable, timeout, an HTTP error status, a malformed body, `degraded: true` — silently keeps the local behaviour (the usual "Nothing in the registries matches" reply), and the failure is written to the log (`semantic lookup via PRINT_FUZZY_URL failed, ...`).
+- **Reference implementation:** [`examples/cloudflare/fuzzy-lookup`](https://github.com/catduckgnaf/print-handy/blob/main/examples/cloudflare/fuzzy-lookup/README.md) is the Cloudflare Worker this contract was designed around (Workers AI embeddings, stateless, secret in the path). Setup, free-tier usage and privacy are in [Running the AI features on Cloudflare's free tier](./cloudflare.md).
 
 ## Local failure detector
 
@@ -251,7 +316,7 @@ Each printer's runtime state lives in its own folder, `state/printers/<id>/` und
 | `printers.id` | file only | — | Required. The printer's stable identity: a slug of `a-z`, `0-9`, `-` and `_` starting with a letter or digit, unique in the list. Renaming an `id` makes it a different printer as far as its state is concerned |
 | `printers.model` | file only | — | Required. A registry model key, spelled exactly as `printer.model` |
 | `printers.name` | `PRINT_HANDY__PRINTERS__<ID>__NAME` | — | Display name for this printer; defaults to the name the model's own defaults give `printer.name` |
-| `printers.chat_id` | `PRINT_HANDY__PRINTERS__<ID>__CHAT_ID` | — | This printer's channel on the platform the bot runs (Discord channel ID, Telegram chat ID, or Matrix room ID); empty falls back to that platform's global chat. Two entries may not claim the same channel |
+| `printers.chat_id` | `PRINT_HANDY__PRINTERS__<ID>__CHAT_ID` | — | This printer's channel on the platform the bot runs (Discord channel ID, Telegram chat ID, or Matrix room ID); empty falls back to that platform's global chat. Two or more entries claiming the same channel make it a shared channel that asks which printer (see **Shared channels (#536)** above) |
 | `printers.moonraker_url` | `PRINT_HANDY__PRINTERS__<ID>__MOONRAKER_URL` | — | This entry's `services.moonraker_url`; must be empty for offline, Bambu LAN, stock Flashforge, PrusaLink and SDCP models |
 | `printers.moonraker_ws_url` | `PRINT_HANDY__PRINTERS__<ID>__MOONRAKER_WS_URL` | — | This entry's `services.moonraker_ws_url`; derived from `moonraker_url` when empty |
 | `printers.octoprint_url` | `PRINT_HANDY__PRINTERS__<ID>__OCTOPRINT_URL` | — | This entry's `services.octoprint_url`, for OctoPrint models |
@@ -278,13 +343,13 @@ These configure the Compose deployment, not Print Handy itself. Set them in `.en
 | `PRINT_HANDY_CONFIG` | `/app/config/docker.yaml` | Settings file Print Handy reads (YAML, or legacy `.toml`) |
 | `DISCORD_CLIENT_ID` | empty | The Discord application's ID for the live view (#311): a plain identifier (it appears in invite URLs), not a secret. The Activity server refuses to start without it when live viewing is enabled |
 | `CLOUDFLARED_IMAGE` | none, required for the sidecar | Image the optional `cloudflared` sidecar runs (Compose profile `live-stream`): a locally tested tag or immutable digest of the Cloudflare Tunnel connector |
-| `TZ` | `UTC` | Container timezone (IANA name), used by the bundled Spoolman; Print Handy itself uses `discord.timezone` |
+| `TZ` | `America/New_York` | Container timezone (IANA name): the image's local time for log timestamps, scheduled and timed features and the bundled services' timestamps. Set any IANA name, for example `Europe/London`; an unknown name is logged at startup and the default is used. Chat display times follow `discord.timezone` instead |
 
 ## Runtime environment
 
 | Variable | Default | What it does |
 |---|---|---|
-| `PRINT_HANDY_ORCA_CHANNEL` | `stable` | Selects the bundled stable or alpha OrcaSlicer at startup; invalid values stop the container |
+| `PRINT_HANDY_ORCA_CHANNEL` | `stable` | Selects the bundled stable or preview OrcaSlicer at startup; `alpha` is accepted as the old name for `preview`, with a startup notice; invalid values stop the container |
 | `PRINT_HANDY_BUNDLED_SPOOLMAN` | `true` | `true` runs the bundled Spoolman API; `false` uses `services.spoolman_url` only |
 | `SPOOLMAN_HOST` | `127.0.0.1` | Bundled Spoolman bind address; widen it only together with an approved port mapping, see docs/DOCKER.md |
 | `PRINT_VISION_URL` | empty | Custom vision endpoint for camera checks; takes precedence over `services.vision_chat_url` and needs no key. See [Custom vision endpoint](#custom-vision-endpoint-print_vision_url) |
@@ -294,12 +359,12 @@ These configure the Compose deployment, not Print Handy itself. Set them in `.en
 
 ## Build arguments
 
-Image build inputs (`docker build --build-arg NAME=value`), not runtime settings. `PRINT_HANDY_ORCA_CHANNEL` is a runtime environment variable (default `stable`, accepts `alpha`) and requires an image built with `WITH_ORCA=true`.
+Image build inputs (`docker build --build-arg NAME=value`), not runtime settings. `PRINT_HANDY_ORCA_CHANNEL` is a runtime environment variable (default `stable`, accepts `preview`; `alpha` is an accepted alias for `preview`) and requires an image built with `WITH_ORCA=true`.
 
 | Argument | Default | What it does |
 |---|---|---|
 | `APP_CHANNEL` | `development` | Application provenance label, `stable` or `development`; it does not change the source checkout |
-| `WITH_ORCA` | `false` | `true` installs the pinned official prebuilt OrcaSlicer release on both channels (stable and alpha both pin v2.5.0-alpha since #356, each SHA256 verified in `docker/orca-prebuilt.sh`); OrcaSlicer is never built from source; `false` omits it and slicing fails closed |
+| `WITH_ORCA` | `false` | `true` installs the pinned official prebuilt OrcaSlicer release on both channels (stable and preview both pin v2.5.0-beta; both pinned v2.5.0-alpha in #356, each SHA256 verified in `docker/orca-prebuilt.sh`); OrcaSlicer is never built from source; `false` omits it and slicing fails closed |
 | `WITH_GO2RTC` | `true` | `true` installs the pinned official go2rtc prebuilt (v1.9.15, SHA256 verified in `docker/go2rtc-prebuilt.sh`) and the VAAPI driver stack for in-container timelapse capture (#246); the published images set it; `false` omits both |
 | `SPOOLMAN_REF` | `bed3f14ee77a3a571d31b14215d54b0b88a7519c` | Pinned Spoolman v0.27.0 source commit; only its Python API backend is installed, never the web UI |
 | `ORCA_BUILD_JOBS` | `auto` | Bambu Studio source build only: parallel compile jobs, `auto` (memory-aware, below the CPU count) or a whole number from 1 to 64 |
@@ -327,12 +392,23 @@ Secrets come from the environment only (Docker: `.env`, never committed or share
 | `OCTOPRINT_API_KEY` | `octoprint.marlin` printers: OctoPrint application key |
 | `BAMBU_LAN_PASSWORD` | Bambu Lab printers: the LAN access code for read-only status. The variable name is `bambu.lan_access_code_env` |
 | `MOONRAKER_API_KEY` | Moonraker API key, only when Moonraker requires one |
-| `CLIPROXY_API_KEY` | Key for `services.vision_chat_url` |
+| `CLIPROXY_API_KEY` | Key for `services.vision_chat_url` (the name is historical; any provider's key goes here). Not needed when that endpoint is on this machine or your LAN |
+| `MAKERWORLD_TOKEN` | MakerWorld links: the account token, used when `~/.config/bambu/token` does not exist (a saved file wins) |
+| `THINGIVERSE_TOKEN` | Thingiverse links: the App Token, used when `~/.config/thingiverse/token` does not exist (a saved file wins) |
+| `CULTS3D_TOKEN` | Cults3D links: `nickname:key`, used when `~/.config/cults3d/token` does not exist (a saved file wins) |
+| `CREALITYCLOUD_TOKEN` | Creality Cloud downloads: the login, written `model_user_id:model_token`, used when `~/.config/crealitycloud/token` does not exist (a saved file wins). See [Connecting a login-token site from chat](./project-reference.md#connecting-a-login-token-site-from-chat) |
+| `THANGS_TOKEN` | Thangs downloads: the login token, used when `~/.config/thangs/token` does not exist (a saved file wins) |
+| `NEXPRINT_TOKEN` | Nexprint downloads: the login token, used when `~/.config/nexprint/token` does not exist (a saved file wins) |
+| `MYMINIFACTORY_OAUTH_TOKEN` | MyMiniFactory downloads: the OAuth sign-in's access token, used when `~/.config/myminifactory/oauth_token` does not exist (a saved file wins) |
 | `OPENVIKING_API_KEY` | Key for `services.openviking_url` |
 | `AD5X_SERIAL` | Stock Flashforge printers: the printer serial number for the stock LAN API. Never a setting; set it together with `flashforge_stock.host` |
 | `AD5X_CHECK_CODE` | Stock Flashforge printers: the printer check code for the stock LAN API. Never a setting |
 
 The MakerWorld account token is not an environment variable. It is the file `~/.config/bambu/token` (Docker: `/data/.config/bambu/token`), needed only for MakerWorld links; see [MakerWorld account token](./project-reference.md#makerworld-account-token).
+
+The Creality Cloud download token is likewise a file, not an environment variable: `~/.config/crealitycloud/token` (Docker: `/data/.config/crealitycloud/token`), needed only for Creality Cloud downloads; see [Creality Cloud login token](./project-reference.md#creality-cloud-login-token). Thangs and Nexprint work the same way, with `~/.config/thangs/token` and `~/.config/nexprint/token` (Docker: under `/data/.config/`); see [Connecting a login-token site from chat](./project-reference.md#connecting-a-login-token-site-from-chat).
+
+Direct file links — a public link straight at a `.stl` or `.3mf` file on any host, including a Dropbox share link — need no token and no setting; the fetch is guarded (public addresses only, the shared 200 MiB intake size limit) as described in [Direct file links](./project-reference.md#direct-file-links).
 
 ## Legacy environment names
 
