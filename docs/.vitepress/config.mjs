@@ -36,6 +36,7 @@ export default defineConfig({
           { text: 'AD5X best practices', link: '/device-ad5x' },
           { text: 'Best practices on specific devices', link: '/device-best-practices' },
           { text: 'Firmware updates', link: '/firmware-update' },
+          { text: 'Running the AI features on Cloudflare\'s free tier', link: '/cloudflare' },
         ],
       },
     ],
