@@ -23,7 +23,7 @@ The YAML file remains the only source of truth. The Web UI does not keep a secon
 | `GET /designs/<id>` | One design session: its final `.scad` source and file downloads |
 | `GET /designs/<id>/<scad\|stl\|preview>` | That session's `.scad`, final `.stl`, or preview PNG download |
 | `GET /layers` | Read-only list of sliced plates already in the archive |
-| `GET /layers/<job>/<file>?layer=N` | One plate's layers, colored by extrusion role |
+| `GET /layers/<job>/<n>?layer=N` | Plate number `n` of that job (0 is the first), colored by extrusion role |
 
 ### Designs page
 
@@ -31,9 +31,9 @@ The designs page is a read-only catalog of the AI design sessions kept on the ma
 
 ### Sliced layers
 
-`/layers` lists plates whose G-code is already in the archive (the `JOB.json` next to each plate names the file). Opening one draws that plate one layer at a time. Extrusion is colored by role: perimeter, infill, support, and anything else. Travel is drawn faint. Previous and next links stay inside the file's layer range, and the drawing can be panned. A file that is not G-code, or that has no extrusion, shows an error and no drawing. The page has no print, pause, or exclude control. It does not start a job and it does not change the confirm card in chat. With the Web UI disabled, the route is not served.
+`/layers` lists plates whose G-code is already in the archive (the `JOB.json` next to each plate names the file). Opening one draws that plate one layer at a time. Extrusion is colored by role: perimeter, infill, support, and anything else. Travel is drawn faint. Previous and next links stay inside the file's layer range, and the drawing can be panned. A job sliced into several plates (a multicolor split, for example) lists every plate. A file that is not G-code, or that has no extrusion, shows an error and no drawing. A file over 8 MB, or one with more than 200,000 moves, shows "too large to draw here" and no drawing. The page has no print, pause, or exclude control. It does not start a job and it does not change the confirm card in chat. With the Web UI disabled, the route is not served.
 
-Paths stay inside the archive: the address is a job folder plus a plate file that job's own `JOB.json` names. A path outside that plate is not opened.
+Paths stay inside the archive: the address is a job folder plus the plate's position in that job's own `JOB.json` (`gcode` first, then each derived plate), because every plate file has the same name. Older `/layers/<job>/plate_1.gcode` links no longer open. A path outside that plate is not opened.
 
 ### Status page
 
@@ -160,9 +160,9 @@ Open `/config`, or follow the **configuration page** link from the status page. 
 - Logging
 - Web UI
 
-Pickers appear wherever the setting has a defined choice set — for example the printer registry, bot mode and platform, slicer and delivery methods offered by the configured printer's vendor, timezone, log level and format, and the timelapse and camera type pickers. Toggles are checkboxes. Numbers use bounded numeric inputs; genuinely free values such as IDs, hosts and URLs remain text inputs and are checked by the same settings validators Print Handy uses at startup.
+Pickers appear wherever the setting has a defined choice set — for example the printer registry, bot mode and platform, slicer and delivery methods offered by the configured printer's vendor, timezone, log level and format, and the timelapse and camera type pickers. Options are listed A to Z by the text shown (a printer's name, not its key). Toggles are checkboxes. Numbers use bounded numeric inputs; genuinely free values such as IDs, hosts and URLs remain text inputs and are checked by the same settings validators Print Handy uses at startup.
 
-The two type pickers are explicit settings, not page-only choices. **Timelapse mode** is `rendered` (the printer renders it with moonraker-timelapse), `container` (Print Handy captures and encodes it in the container), or `off`; an empty file value derives `rendered` when a Moonraker URL is configured, otherwise `off`. **Camera source** is `auto` (follow the configured printer vendor's rule), `moonraker`, `bambu`, `go2rtc`, or `none`.
+The two type pickers are explicit settings, not page-only choices. **Timelapse mode** is `rendered` (the printer renders it with moonraker-timelapse), `container` (Print Handy captures and encodes it in the container), or `off`; an empty file value derives `rendered` when a Moonraker URL is configured, otherwise `off`. **Camera source** is `auto` (follow the configured printer vendor's rule), `moonraker`, `bambu`, `go2rtc`, or `none`. **RTSP stream URL** (`timelapse.capture_source_url`) is the address go2rtc ingests when you have an `rtsp://` camera; leave it empty to keep using the snapshot. **Printer URL** is the one address field for the selected model: Moonraker, OctoPrint (including an OctoPi on another computer), or the LAN hostname for Bambu, Prusa, stock Flashforge, and Elegoo SDCP. The ZMod delivery format field is shown only for a Flashforge ZMod model.
 
 Every field shows its effective value and a provenance badge:
 

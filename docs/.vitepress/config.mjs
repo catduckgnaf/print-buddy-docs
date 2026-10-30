@@ -37,6 +37,7 @@ export default defineConfig({
           { text: 'Best practices on specific devices', link: '/device-best-practices' },
           { text: 'Firmware updates', link: '/firmware-update' },
           { text: 'Running the AI features on Cloudflare\'s free tier', link: '/cloudflare' },
+          { text: 'Sovol printers', link: '/sovol' },
         ],
       },
     ],
