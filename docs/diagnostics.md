@@ -121,6 +121,38 @@ not help), and a `PB_INTAKE_UNKNOWN` reference. The rules now are:
   debug-mode marker and the Spoolman notice — uses the `PH_` prefix.
   See the alias table above for the old codes.
 
+Two boundaries folded into the same allowlist after #590 (the #605 and
+#608 follow-on, once both had landed). Creality Cloud's credential
+failures were already recognized through the site list above; the new
+rows are its two remaining operator-fixable failures. Direct file links
+(#607) are recognized by the `DirectLinkError` type name over the
+provider's curated phrasing, with the wording built in
+`diagnostics.py` — the original message can name the operator's host
+or carry a credential-bearing URL, and neither reaches chat.
+
+| Failure | Category | The post names |
+| --- | --- | --- |
+| Creality Cloud download answer with no findable file URL | `configuration` | The answer gap, with the browser-download remedy |
+| Creality Cloud model does not exist / not found | `configuration` | The model is gone or the link is wrong; check the link |
+| Direct link points at a non-public address | `configuration` | Direct links must be public links anyone can open |
+| Direct link scheme is not http/https | `configuration` | Send an http:// or https:// link |
+| Direct link carries a user name or password | `configuration` | Credential-carrying links are refused; share a public link |
+| Direct link has no host name / no address to fetch | `configuration` | Send the complete link |
+| Direct link host cannot be looked up (DNS) | `transient` | Check the link or the network, then send it again |
+| Direct link host cannot be reached | `transient` | Check the link or the network, then send it again |
+| Direct link host answered HTTP 401/403 (or another non-retry status) | `configuration` | The status; check the link is public and the file is still there |
+| Direct link host answered HTTP 429/5xx | `transient` | The status; check the link, then send it again |
+| Direct link redirected too many times | `configuration` | Send a link that points at the file more directly |
+| Direct link returned a web page instead of a print file | `configuration` | Use the host's direct download link; a Dropbox share link works as-is |
+| Direct link file is not a 3MF / not a print file / empty | `configuration` | Check the link points at the model's .stl or .3mf file itself |
+
+The direct-link HTTP row parses the status out of the curated message
+text: `DirectLinkError` discards the `HTTPError`, so the `code`
+attribute path in `classify` cannot see it. Creality Cloud's unexpected
+answer and its bare envelope refusal codes deliberately stay
+`unknown` — neither is operator-fixable, and the allowlist only claims
+causes an operator can act on.
+
 What did not change: logging (full tracebacks stay in the logs), safety
 refusals and confirmation gates, and the curated refusal texts that
 already named their reason (`IntakeLimitExceeded`, the multi-slot
@@ -198,7 +230,7 @@ What changed, surface by surface:
 
 | Surface | Before → after |
 | --- | --- |
-| Slicing failure (prepared intake) | `Slicing failed: {raw error}` → "Slicing this model did not work. No G-code was kept, and nothing was uploaded or started. Retry once from the saved model?" + `Reference: PH_SLICING_*`; the raw error stays in the receipt and log |
+| Slicing failure (prepared intake) | Names the failed slicer (including a failed fallback), timeout, process limit, copy placement, changed job, or safety check and gives a specific next step. An unidentified cause says so and points to `/print-handy bundle`. Every failed retry retains its reason, reference and diagnostics step. Raw errors stay in the receipt and logs. |
 | Deterministic slice refusal (prepared intake) | A `SliceRefusal` (`print_handy/core/slice_refusal.py`) says the reason in plain words — e.g. "Slot 1 (Matte white PLA) was never confirmed as loaded, so I have not sliced yet … Is Matte white PLA loaded in slot 1?" — classified `configuration` (`Reference: PH_SLICING_CONFIGURATION`, never `*_UNKNOWN`). Where a safe fix exists it is the button ("Yes, slot 1 has it: slice"), applied before the one re-slice; with no safe fix the post explains and offers no retry. An exception may declare its own category with a `diagnostic_category` attribute, which `classify` honors |
 | Backup-slicer notice | `Bambu Studio sliced it because OrcaSlicer failed: {reason}` → "Sliced with the backup slicer (Bambu Studio) because the main slicer could not slice this model."; the reason is logged |
 | Fit / resize checks unverified | trailing raw exception → plain unverified wording + resume step + marker |
