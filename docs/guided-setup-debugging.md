@@ -26,8 +26,10 @@ Setup asks seven small steps, validating each answer before moving on:
 2. **Bot mode** — `standalone` or `hermes`.
 3. **Print channel** — the numeric Discord channel ID.
 4. **Allowed users** — numeric Discord user IDs, comma separated.
-5. **Moonraker URL** (optional) — validated as a URL, and refused for printer models that
-   have no Moonraker connection.
+5. **Printer URL** (optional) — the address for the model chosen in step 1. Klipper
+   (Moonraker) and OctoPrint take a URL, and that host can be another computer.
+   Bambu Lab, PrusaLink, stock Flashforge, and Elegoo SDCP take a hostname or IP,
+   not a full URL. A model with no address accepts only `skip`.
 6. **Spoolman URL** (optional) — validated as a URL. Spoolman is printer-independent, so
    this step is offered for every model, including models with no Moonraker connection.
    The Spoolman included in the Docker stack (#214) is at `http://spoolman:8000`; an
@@ -61,7 +63,7 @@ repeated back) and offers four replies:
   in the file always win, and no secret is written (the flow collected none).
 - `add` — set up another printer (#337). The flow asks for the first printer's id (the base
   flow never needed one) and then, per added printer, its id, model, own channel and
-  Moonraker URL. Applying then writes a `[[printers]]` roster instead of the single-printer
+  Printer URL (a URL or a hostname, matching that printer). Applying then writes a `[[printers]]` roster instead of the single-printer
   sections — and refuses, leaving the file untouched, when the existing file already
   describes a printer or cannot be rewritten faithfully. Each added printer gets its own
   channel binding and state folder; Spoolman stays one shared inventory.
@@ -88,7 +90,10 @@ until `apply` at the review step.
    serial and the LAN-mode choice; a PrusaLink host; an Elegoo SDCP host (with the note that
    SDCP has no authentication at all); an OctoPrint URL; or a stock FlashForge host. Leaving
    the address blank (or choosing no LAN connection) adds the printer as an offline entry.
-4. **Secrets are never collected in chat.** Where the connection needs one, the step names
+4. **Secrets are never collected in chat.** (The one deliberate exception is a model-site login
+   token the operator chooses to paste; see
+   [Connecting a login-token site from chat](./project-reference.md#connecting-a-login-token-site-from-chat).)
+   Where the connection needs one, the step names
    the environment variable to store it in — a per-printer name for Bambu Lab
    (`BAMBU_LAN_PASSWORD_<ID>`) and PrusaLink (`PRUSA_LINK_API_KEY_<ID>`), so each printer
    keeps its own secret — and you reply `stored` when it is saved in the `.env`, exactly
