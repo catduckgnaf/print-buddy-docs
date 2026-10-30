@@ -23,10 +23,10 @@ Stock Marlin, also listed under Klipper for a converted machine:
 | SV03 | 360 x 360 | 410 |
 | SV04 | 300 x 300 | 400 |
 | SV05 | 220 x 220 | 300 |
-| SV06 | 220 x 220 | 250 on `sovol_marlin.sv06` |
+| SV06 | 220 x 220 | 250 |
 | SV06 Plus | 300 x 300 | 340 |
 
-`sovol.sv06` keeps the height this project already sliced with (220 mm). Do not treat that as the Orca 250 mm figure.
+Both SV06 keys (`sovol.sv06` and `sovol_marlin.sv06`) use the machine's real 250 mm height, matching the OrcaSlicer profile and the shipped templates.
 
 Factory Klipper (Klipper key only):
 
@@ -43,6 +43,6 @@ Factory Klipper (Klipper key only):
 
 The SV04 is an IDEX machine, and the M1D is a multi-tool machine. These catalog entries are the single-mode or single-toolhead volume only. They do not slice copy mode, mirror mode, or a tool change.
 
-Start G-code on the Klipper keys is the same `PRINT_START` / `PRINT_END` family as `sovol.sv06`. If the installed firmware uses a different macro, set `printer.start_macro` and `printer.end_macro` before the first print. The Marlin keys use OctoPrint and do not send Moonraker macros; their start G-code heats, then homes (`G28`) before it prints.
+Start G-code on the Klipper keys is the same `PRINT_START` / `PRINT_END` family as `sovol.sv06`. If the installed firmware uses a different macro, set `printer.start_macro` and `printer.end_macro` before the first print. Two stock firmwares name their own start macro differently: the SV08 line's stock config and the Zero's stock firmware define `START_PRINT` (the Zero's pair is `START_PRINT` / `END_PRINT`, called bare), and the macro registry describes those stock names for those models too — see MACROS.md for the per-model coverage and the Zero's macro-pack caveat. The Marlin keys use OctoPrint and do not send Moonraker macros; their start G-code heats, then homes (`G28`) before it prints.
 
 A config written before this split with a bare `model: sv06` keeps meaning `sovol.sv06`. Use `sovol_marlin.sv06` (or `vendor: sovol_marlin`) for the stock Marlin SV06.
