@@ -10,7 +10,10 @@ synced), applying the site's established transformations:
 - file names are lowercased per scripts/sync-manifest.tsv,
 - a markdown link to another published guide becomes ./<site file>,
 - a markdown link to anything else in the Print Handy repo becomes the
-  absolute GitHub URL (https://github.com/catduckgnaf/print-handy/blob/main/<path>),
+  absolute GitHub URL (https://github.com/catduckgnaf/print-handy/blob/main/<path>);
+  a link to a directory (an extensionless target) becomes the tree URL
+  (https://github.com/catduckgnaf/print-handy/tree/main/<path>) instead of
+  surviving as a relative link the site cannot resolve,
 - the manifest's SHA-256 column is updated to the upstream file's hash.
 
 It also handles the two structural cases the manual process handles:
@@ -52,6 +55,7 @@ MANIFEST = REPO_ROOT / "scripts" / "sync-manifest.tsv"
 CHECK_SYNC = REPO_ROOT / "scripts" / "check-sync.sh"
 CONFIG = DOCS_DIR / ".vitepress" / "config.mjs"
 GITHUB_BLOB = "https://github.com/catduckgnaf/print-handy/blob/main/"
+GITHUB_TREE = "https://github.com/catduckgnaf/print-handy/tree/main/"
 LINK_RE = re.compile(r"\]\(([^)\s]+)((?:\s+\"[^\"]*\")?)\)")
 
 
@@ -96,7 +100,17 @@ def rewrite_links(text, upstream_to_site):
             return match.group(0)
         path, _, anchor = target.partition("#")
         if "." not in posixpath.basename(path):
-            return match.group(0)  # anchor-only or a placeholder like (URL)
+            if "/" not in path:
+                return match.group(0)  # anchor-only or a placeholder like (URL)
+            # An extensionless target with a path separator is a link to a
+            # directory in the repo (e.g. ../firmware/commands): point it at
+            # the GitHub tree view rather than leaving a relative link the
+            # site cannot resolve (a dead link fails the site build).
+            resolved_dir = posixpath.normpath(posixpath.join("docs", path))
+            new_target = GITHUB_TREE + resolved_dir
+            if anchor:
+                new_target += "#" + anchor
+            return f"]({new_target}{title})"
         resolved = posixpath.normpath(posixpath.join("docs", path))
         base = posixpath.basename(resolved)
         if (resolved.startswith("docs/") and path.lower().endswith(".md")
